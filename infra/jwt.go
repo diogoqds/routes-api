@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"os"
 )
@@ -42,12 +43,16 @@ func (j jsonWebTokenImplementation) Decode(token string) (jwt.MapClaims, error) 
 
 	claims := jwt.MapClaims{}
 
-	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+	decodedToken, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
 
 	if err != nil {
 		return nil, err
+	}
+
+	if !decodedToken.Valid {
+		return nil, errors.New("invalid token")
 	}
 
 	return claims, nil
