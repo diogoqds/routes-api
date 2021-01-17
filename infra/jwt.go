@@ -1,4 +1,4 @@
-package authentication
+package infra
 
 import (
 	"github.com/dgrijalva/jwt-go"

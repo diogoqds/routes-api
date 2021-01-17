@@ -1,4 +1,4 @@
-package authentication
+package infra
 
 import (
 	"errors"
