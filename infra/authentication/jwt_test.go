@@ -11,9 +11,8 @@ var (
 	RealEncodeImplementation func(body map[string]interface{}) (string, error)
 )
 
-func TestMain(t *testing.M) {
+func init() {
 	RealEncodeImplementation = Jwt.Encoder.Encode
-	t.Run()
 }
 
 type jsonWebTokenEncoderMock struct {
@@ -24,7 +23,15 @@ func (mock jsonWebTokenEncoderMock) Encode(body map[string]interface{}) (string,
 	return mock.encodeFunc(body)
 }
 
+func cleanMocks() {
+	jwtEncoderMock := jsonWebTokenEncoderMock{}
+	jwtEncoderMock.encodeFunc = RealEncodeImplementation
+
+	Jwt.Encoder = jwtEncoderMock
+}
+
 func TestJsonWebToken_EncodeSuccess(t *testing.T) {
+	cleanMocks()
 	body := map[string]interface{}{
 		"id": 1,
 	}
@@ -36,6 +43,7 @@ func TestJsonWebToken_EncodeSuccess(t *testing.T) {
 }
 
 func TestJsonWebToken_EncodeError(t *testing.T) {
+	cleanMocks()
 	jwtEncoderMock := jsonWebTokenEncoderMock{}
 	jwtEncoderMock.encodeFunc = func(body map[string]interface{}) (string, error) {
 		return "", errors.New("error generating the JWT token")
@@ -53,14 +61,11 @@ func TestJsonWebToken_EncodeError(t *testing.T) {
 }
 
 func TestJsonWebToken_DecodeSuccess(t *testing.T) {
-	jwtEncoderMock := jsonWebTokenEncoderMock{}
-	jwtEncoderMock.encodeFunc = RealEncodeImplementation
+	cleanMocks()
 
 	body := map[string]interface{}{
 		"id": 1,
 	}
-
-	Jwt.Encoder = jwtEncoderMock
 
 	token, _ := Jwt.Encoder.Encode(body)
 
@@ -71,6 +76,7 @@ func TestJsonWebToken_DecodeSuccess(t *testing.T) {
 }
 
 func TestJsonWebToken_DecodeError(t *testing.T) {
+	cleanMocks()
 	result, err := Jwt.Decoder.Decode("invalid token")
 
 	assert.EqualValues(t, "token contains an invalid number of segments", err.Error())
