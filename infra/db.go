@@ -1,12 +1,12 @@
 package infra
 
 import (
-
 	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"os"
-    "strconv"
+	"strconv"
 )
 
 var (
@@ -27,7 +27,8 @@ func SetupDB()  {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
-	DB, err := sql.Open("postgres", psqlInfo)
+	DB, err := sqlx.Connect("postgres", psqlInfo)
+	
 	if err != nil {
 		panic(err)
 	}
