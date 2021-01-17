@@ -1,24 +1,27 @@
 version: '3'
+volumes:
+  postgis-data:
 
 services:
   api:
     build: .
     ports:
-      - "3000:3000"
+      - 3000:3000
     depends_on:
       - db
   db:
-    image: kartoza/postgis:11.0-2.5
+    image: kartoza/postgis:12.0
     volumes:
-     - postgis-data:/var/lib/postgresql
+      - postgis-data:/var/lib/postgresql
     environment:
-     - POSTGRES_DB=gis
-     - POSTGRES_USER=gis_admin
-     - POSTGRES_PASS=admin
-     - POSTGRES_DBNAME=gis
+      - POSTGRES_DB=gis
+      - POSTGRES_USER=docker
+      - POSTGRES_PASS=docker
+      - ALLOW_IP_RANGE=0.0.0.0/0
+      # Add extensions you need to be enabled by default in the DB. Default are the five specified below
+      - POSTGRES_MULTIPLE_EXTENSIONS=postgis,hstore,postgis_topology,postgis_raster,pgrouting
     ports:
-     - 5434:5432
+      - 5432:5432
     restart: on-failure
-
-volumes:
- postgis-data:
+    healthcheck:
+      test: "exit 0"

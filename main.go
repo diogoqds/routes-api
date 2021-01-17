@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/diogoqds/routes-challenge-api/infra"
 	"github.com/joho/godotenv"
 	"log"
 )
@@ -14,4 +15,5 @@ func init() {
 
 func main() {
 	log.Println("Starting the application")
+	infra.SetupDB()
 }
