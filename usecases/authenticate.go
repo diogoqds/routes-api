@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"errors"
+	"github.com/diogoqds/routes-challenge-api/infra"
 	"github.com/diogoqds/routes-challenge-api/repositories"
 )
 
@@ -11,11 +12,17 @@ func Authenticate(email string) (string, error) {
 		return "", errors.New("email must be provided")
 	}
 
-	_, err := repositories.AdminRepo.FindByEmail(email)
+	admin, err := repositories.AdminRepo.FindByEmail(email)
 
 	if err != nil {
 		return "", err
 	}
 
-	return "valid_token", nil
+	token, err := infra.Jwt.Encoder.Encode(map[string]interface{}{ "id": admin.Id })
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
