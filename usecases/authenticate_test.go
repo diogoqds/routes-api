@@ -2,21 +2,21 @@ package usecases
 
 import (
 	"errors"
+	"github.com/diogoqds/routes-challenge-api/entities"
+	"github.com/diogoqds/routes-challenge-api/infra"
 	"github.com/diogoqds/routes-challenge-api/repositories"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/diogoqds/routes-challenge-api/entities"
-	"github.com/diogoqds/routes-challenge-api/infra"
 	"time"
 )
 
 type Scenario struct {
-	TestName string
-	Email string
-	Token string
-	Err error
+	TestName        string
+	Email           string
+	Token           string
+	Err             error
 	findByEmailFunc func(email string) (*entities.Admin, error)
-	encodeFunc func(body map[string]interface{}) (string, error)
+	encodeFunc      func(body map[string]interface{}) (string, error)
 }
 
 type mockAdminRepo struct {
@@ -42,9 +42,9 @@ func TestAuthenticate(t *testing.T) {
 	scenarios := []Scenario{
 		{
 			TestName: "when email is valid",
-			Email: "admin@email.com",
-			Token: "valid_token",
-			Err: nil,
+			Email:    "admin@email.com",
+			Token:    "valid_token",
+			Err:      nil,
 			findByEmailFunc: func(email string) (*entities.Admin, error) {
 				return &entities.Admin{
 					Id:        0,
@@ -59,27 +59,27 @@ func TestAuthenticate(t *testing.T) {
 		},
 		{
 			TestName: "when email is invalid",
-			Email: "invalid@email.com",
-			Token: "",
-			Err: errors.New("admin not found"),
+			Email:    "invalid@email.com",
+			Token:    "",
+			Err:      errors.New("admin not found"),
 			findByEmailFunc: func(email string) (*entities.Admin, error) {
 				return nil, errors.New("admin not found")
 			},
 		},
 		{
 			TestName: "when email isn't passed",
-			Email: "",
-			Token: "",
-			Err: errors.New("email must be provided"),
+			Email:    "",
+			Token:    "",
+			Err:      errors.New("email must be provided"),
 			findByEmailFunc: func(email string) (*entities.Admin, error) {
 				return nil, errors.New("admin not found")
 			},
 		},
 		{
 			TestName: "when an error occurs with the token generation",
-			Email: "admin@email.com",
-			Token: "",
-			Err: errors.New("error generating token"),
+			Email:    "admin@email.com",
+			Token:    "",
+			Err:      errors.New("error generating token"),
 			findByEmailFunc: func(email string) (*entities.Admin, error) {
 				return &entities.Admin{
 					Id:        0,

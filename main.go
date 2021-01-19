@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/diogoqds/routes-challenge-api/infra"
 	"github.com/diogoqds/routes-challenge-api/config"
+	"github.com/diogoqds/routes-challenge-api/infra"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"

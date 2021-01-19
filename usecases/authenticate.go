@@ -18,7 +18,7 @@ func Authenticate(email string) (string, error) {
 		return "", err
 	}
 
-	token, err := infra.Jwt.Encoder.Encode(map[string]interface{}{ "id": admin.Id })
+	token, err := infra.Jwt.Encoder.Encode(map[string]interface{}{"id": admin.Id})
 
 	if err != nil {
 		return "", err
