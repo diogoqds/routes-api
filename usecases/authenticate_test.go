@@ -75,6 +75,23 @@ func TestAuthenticate(t *testing.T) {
 				return nil, errors.New("admin not found")
 			},
 		},
+		{
+			TestName: "when an error occurs with the token generation",
+			Email: "admin@email.com",
+			Token: "",
+			Err: errors.New("error generating token"),
+			findByEmailFunc: func(email string) (*entities.Admin, error) {
+				return &entities.Admin{
+					Id:        0,
+					Email:     "admin@email.com",
+					CreatedAt: time.Time{},
+					UpdatedAt: time.Time{},
+				}, nil
+			},
+			encodeFunc: func(body map[string]interface{}) (string, error) {
+				return "", errors.New("error generating token")
+			},
+		},
 	}
 
 	for _, scenario := range scenarios {
