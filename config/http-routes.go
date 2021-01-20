@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/diogoqds/routes-challenge-api/controllers"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -17,4 +18,6 @@ func ConfigHttpRoutes(router *mux.Router) {
 		}
 
 	}).Methods(http.MethodGet)
+
+	router.HandleFunc("/login", controllers.Login).Methods(http.MethodPost)
 }

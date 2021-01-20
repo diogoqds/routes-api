@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"context"
 	"database/sql"
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/infra"
@@ -16,9 +15,9 @@ type AdminRepository struct{}
 
 func (a AdminRepository) FindByEmail(email string) (*entities.Admin, error) {
 	var admin entities.Admin
-	var ctx context.Context
 
-	err := infra.DB.QueryRowContext(ctx, "SELECT id, email, created_at, updated_at FROM admins WHERE email=?", email).Scan(&admin)
+	err := infra.DB.Get(&admin, "SELECT id, email FROM admins WHERE email = $1", email)
+
 	switch {
 	case err == sql.ErrNoRows:
 		log.Printf("no admin with email %d\n", email)
