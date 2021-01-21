@@ -103,7 +103,7 @@ func TestAuthenticate(t *testing.T) {
 			repositories.AdminRepo = mockAdminRepository
 			infra.Jwt.Encoder = mockJwtEncoder
 
-			token, err := Authenticate(scenario.Email)
+			token, err := AuthService.Authenticate(scenario.Email)
 			assert.EqualValues(t, scenario.Token, token)
 			assert.EqualValues(t, scenario.Err, err)
 		})
