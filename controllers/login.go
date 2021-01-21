@@ -30,7 +30,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := usecases.AuthService.Authenticate(bodyParams.Email)
 	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 

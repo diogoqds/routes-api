@@ -11,7 +11,6 @@ type Auth interface {
 }
 
 type Authenticator struct {
-
 }
 
 func (a Authenticator) Authenticate(email string) (string, error) {
