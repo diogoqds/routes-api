@@ -28,7 +28,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := usecases.Authenticate(bodyParams.Email)
+	token, err := usecases.AuthService.Authenticate(bodyParams.Email)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return

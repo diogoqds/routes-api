@@ -6,7 +6,15 @@ import (
 	"github.com/diogoqds/routes-challenge-api/repositories"
 )
 
-func Authenticate(email string) (string, error) {
+type Auth interface {
+	Authenticate(email string) (string, error)
+}
+
+type Authenticator struct {
+
+}
+
+func (a Authenticator) Authenticate(email string) (string, error) {
 
 	if email == "" {
 		return "", errors.New("email must be provided")
@@ -26,3 +34,7 @@ func Authenticate(email string) (string, error) {
 
 	return token, nil
 }
+
+var (
+	AuthService Auth = Authenticator{}
+)

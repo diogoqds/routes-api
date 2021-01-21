@@ -2,12 +2,13 @@ package usecases
 
 import (
 	"errors"
+	"testing"
+	"time"
+
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/infra"
 	"github.com/diogoqds/routes-challenge-api/repositories"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 type Scenario struct {
