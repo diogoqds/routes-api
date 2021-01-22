@@ -26,7 +26,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			if err != nil {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte(`{ "message": "Unauthorized"`))
+				w.Write([]byte(`{ "message": "unauthorized"}`))
 				return
 			}
 

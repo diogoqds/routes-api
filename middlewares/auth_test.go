@@ -3,6 +3,7 @@ package middlewares
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/infra"
@@ -59,6 +60,16 @@ func TestAuthMiddleware(t *testing.T) {
 			StatusCode:    http.StatusUnauthorized,
 			ErrorMessage:  "Malformed Token",
 		},
+		{
+			Name:       "when jwt decoder returns an error",
+			AuthHeader: "Bearer token",
+			JwtDecodeFunc: func(token string) (jwt.MapClaims, error) {
+				return nil, errors.New("error while decoding the token")
+			},
+			FindByIdFunc: nil,
+			StatusCode:   http.StatusUnauthorized,
+			ErrorMessage: "unauthorized",
+		},
 	}
 
 	for _, scenario := range scenarios {
@@ -71,7 +82,7 @@ func TestAuthMiddleware(t *testing.T) {
 
 			request, _ := http.NewRequest(http.MethodGet, "/", bytes.NewBuffer([]byte("")))
 
-			request.Header.Set("Content-Type", scenario.AuthHeader)
+			request.Header.Set("Authorization", scenario.AuthHeader)
 
 			response := httptest.NewRecorder()
 
@@ -81,7 +92,6 @@ func TestAuthMiddleware(t *testing.T) {
 			var body map[string]interface{}
 
 			json.Unmarshal(respBody, &body)
-
 			assert.EqualValues(t, scenario.StatusCode, response.Code)
 			assert.EqualValues(t, scenario.ErrorMessage, body["message"])
 		})
