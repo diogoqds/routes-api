@@ -19,7 +19,7 @@ func (a Authenticator) Authenticate(email string) (string, error) {
 		return "", errors.New("email must be provided")
 	}
 
-	admin, err := repositories.AdminRepo.FindByEmail(email)
+	admin, err := repositories.AdminRepo.FinderByEmail.FindByEmail(email)
 
 	if err != nil {
 		return "", err

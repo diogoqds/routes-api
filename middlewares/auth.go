@@ -37,7 +37,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 
-			_, err = repositories.AdminRepo.FindById(id)
+			_, err = repositories.AdminRepo.FinderById.FindById(id)
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)

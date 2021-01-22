@@ -7,21 +7,29 @@ import (
 	"log"
 )
 
-type FindAdmin interface {
+type FinderAdminByEmail interface {
 	FindByEmail(email string) (*entities.Admin, error)
+}
+
+type FinderAdminById interface {
 	FindById(id int64) (*entities.Admin, error)
 }
 
-type AdminRepository struct{}
+type AdminRepository struct {
+	FinderByEmail FinderAdminByEmail
+	FinderById    FinderAdminById
+}
 
-func (a AdminRepository) FindByEmail(email string) (*entities.Admin, error) {
+type adminRepositoryImplementation struct{}
+
+func (a adminRepositoryImplementation) FindByEmail(email string) (*entities.Admin, error) {
 	var admin entities.Admin
 
 	err := infra.DB.Get(&admin, "SELECT id, email FROM admins WHERE email = $1", email)
 
 	switch {
 	case err == sql.ErrNoRows:
-		log.Printf("no admin with email %d\n", email)
+		log.Printf("no admin with email %s\n", email)
 		return nil, err
 	case err != nil:
 		log.Fatalf("query error: %v\n", err)
@@ -32,7 +40,7 @@ func (a AdminRepository) FindByEmail(email string) (*entities.Admin, error) {
 	}
 }
 
-func (a AdminRepository) FindById(id int64) (*entities.Admin, error) {
+func (a adminRepositoryImplementation) FindById(id int64) (*entities.Admin, error) {
 	var admin entities.Admin
 
 	err := infra.DB.Get(&admin, "SELECT id, email FROM admins WHERE id = $1", id)
@@ -51,5 +59,8 @@ func (a AdminRepository) FindById(id int64) (*entities.Admin, error) {
 }
 
 var (
-	AdminRepo FindAdmin = AdminRepository{}
+	AdminRepo = AdminRepository{
+		FinderByEmail: adminRepositoryImplementation{},
+		FinderById:    adminRepositoryImplementation{},
+	}
 )
