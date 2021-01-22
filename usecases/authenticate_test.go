@@ -100,7 +100,7 @@ func TestAuthenticate(t *testing.T) {
 			mockAdminRepository.findByEmailFunc = scenario.findByEmailFunc
 			mockJwtEncoder.encodeFunc = scenario.encodeFunc
 
-			repositories.AdminRepo = mockAdminRepository
+			repositories.AdminRepo.FinderByEmail = mockAdminRepository
 			infra.Jwt.Encoder = mockJwtEncoder
 
 			token, err := AuthService.Authenticate(scenario.Email)
