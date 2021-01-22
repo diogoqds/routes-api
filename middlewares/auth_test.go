@@ -1,0 +1,90 @@
+package middlewares
+
+import (
+	"bytes"
+	"encoding/json"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/diogoqds/routes-challenge-api/entities"
+	"github.com/diogoqds/routes-challenge-api/infra"
+	"github.com/diogoqds/routes-challenge-api/repositories"
+	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+type Scenario struct {
+	Name          string
+	AuthHeader    string
+	JwtDecodeFunc func(token string) (jwt.MapClaims, error)
+	FindByIdFunc  func(id int64) (*entities.Admin, error)
+	StatusCode    int
+	ErrorMessage  string
+}
+
+type mockJwtDecoder struct {
+	decodeFunc func(token string) (jwt.MapClaims, error)
+}
+
+type mockAdminRepo struct {
+	findByIdFunc func(id int64) (*entities.Admin, error)
+}
+
+func (mock mockJwtDecoder) Decode(token string) (jwt.MapClaims, error) {
+	return mock.decodeFunc(token)
+}
+
+func (mock mockAdminRepo) FindById(id int64) (*entities.Admin, error) {
+	return mock.findByIdFunc(id)
+}
+
+func Hello(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{"hello": "world"}); err != nil {
+		log.Println("[Response Body Error]", err)
+		return
+	}
+}
+
+func TestAuthMiddleware(t *testing.T) {
+	scenarios := []Scenario{
+		{
+			Name:          "when token is in the wrong format",
+			AuthHeader:    "",
+			JwtDecodeFunc: nil,
+			FindByIdFunc:  nil,
+			StatusCode:    http.StatusUnauthorized,
+			ErrorMessage:  "Malformed Token",
+		},
+	}
+
+	for _, scenario := range scenarios {
+		t.Run(scenario.Name, func(t *testing.T) {
+			mockJwt := mockJwtDecoder{decodeFunc: scenario.JwtDecodeFunc}
+			mockAdminRepository := mockAdminRepo{findByIdFunc: scenario.FindByIdFunc}
+
+			infra.Jwt.Decoder = mockJwt
+			repositories.AdminRepo.FinderById = mockAdminRepository
+
+			request, _ := http.NewRequest(http.MethodGet, "/", bytes.NewBuffer([]byte("")))
+
+			request.Header.Set("Content-Type", scenario.AuthHeader)
+
+			response := httptest.NewRecorder()
+
+			AuthMiddleware(Hello).ServeHTTP(response, request)
+			respBody, _ := ioutil.ReadAll(response.Body)
+
+			var body map[string]interface{}
+
+			json.Unmarshal(respBody, &body)
+
+			assert.EqualValues(t, scenario.StatusCode, response.Code)
+			assert.EqualValues(t, scenario.ErrorMessage, body["message"])
+		})
+	}
+
+}

@@ -2,9 +2,10 @@ package middlewares
 
 import (
 	"fmt"
-	"github.com/diogoqds/routes-challenge-api/repositories"
 	"net/http"
 	"strconv"
+
+	"github.com/diogoqds/routes-challenge-api/repositories"
 
 	"strings"
 
