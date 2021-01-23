@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/infra"
@@ -15,6 +14,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 type Scenario struct {
@@ -23,7 +23,7 @@ type Scenario struct {
 	JwtDecodeFunc func(token string) (jwt.MapClaims, error)
 	FindByIdFunc  func(id int64) (*entities.Admin, error)
 	StatusCode    int
-	ErrorMessage  string
+	Message       string
 }
 
 type mockJwtDecoder struct {
@@ -45,7 +45,7 @@ func (mock mockAdminRepo) FindById(id int64) (*entities.Admin, error) {
 func Hello(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if err := json.NewEncoder(w).Encode(map[string]interface{}{"hello": "world"}); err != nil {
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{"message": "you are authenticated"}); err != nil {
 		log.Println("[Response Body Error]", err)
 		return
 	}
@@ -59,7 +59,7 @@ func TestAuthMiddleware(t *testing.T) {
 			JwtDecodeFunc: nil,
 			FindByIdFunc:  nil,
 			StatusCode:    http.StatusUnauthorized,
-			ErrorMessage:  "Malformed Token",
+			Message:       "Malformed Token",
 		},
 		{
 			Name:       "when jwt decoder returns an error",
@@ -69,7 +69,7 @@ func TestAuthMiddleware(t *testing.T) {
 			},
 			FindByIdFunc: nil,
 			StatusCode:   http.StatusUnauthorized,
-			ErrorMessage: "unauthorized",
+			Message:      "unauthorized",
 		},
 		{
 			Name:       "when AdminRepository returns an error",
@@ -80,8 +80,25 @@ func TestAuthMiddleware(t *testing.T) {
 			FindByIdFunc: func(id int64) (*entities.Admin, error) {
 				return nil, errors.New("error while fetching the admin")
 			},
-			StatusCode:   http.StatusInternalServerError,
-			ErrorMessage: "error while fetching the admin",
+			StatusCode: http.StatusInternalServerError,
+			Message:    "error while fetching the admin",
+		},
+		{
+			Name:       "when the token is valid",
+			AuthHeader: "Bearer token",
+			JwtDecodeFunc: func(token string) (jwt.MapClaims, error) {
+				return jwt.MapClaims{"id": float64(1)}, nil
+			},
+			FindByIdFunc: func(id int64) (*entities.Admin, error) {
+				return &entities.Admin{
+					Id:        1,
+					Email:     "admin@email.com",
+					CreatedAt: time.Time{},
+					UpdatedAt: time.Time{},
+				}, nil
+			},
+			StatusCode: http.StatusOK,
+			Message:    "you are authenticated",
 		},
 	}
 
@@ -105,9 +122,8 @@ func TestAuthMiddleware(t *testing.T) {
 			var body map[string]interface{}
 
 			json.Unmarshal(respBody, &body)
-			fmt.Println("body>>>>>", body)
 			assert.EqualValues(t, scenario.StatusCode, response.Code)
-			assert.EqualValues(t, scenario.ErrorMessage, body["message"])
+			assert.EqualValues(t, scenario.Message, body["message"])
 		})
 	}
 
