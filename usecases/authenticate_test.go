@@ -11,15 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type Scenario struct {
-	TestName        string
-	Email           string
-	Token           string
-	Err             error
-	findByEmailFunc func(email string) (*entities.Admin, error)
-	encodeFunc      func(body map[string]interface{}) (string, error)
-}
-
 type mockAdminRepo struct {
 	findByEmailFunc func(email string) (*entities.Admin, error)
 }
@@ -40,7 +31,14 @@ func TestAuthenticate(t *testing.T) {
 	mockAdminRepository := mockAdminRepo{}
 	mockJwtEncoder := jsonWebTokenEncoderMock{}
 
-	scenarios := []Scenario{
+	scenarios := []struct {
+		TestName        string
+		Email           string
+		Token           string
+		Err             error
+		findByEmailFunc func(email string) (*entities.Admin, error)
+		encodeFunc      func(body map[string]interface{}) (string, error)
+	}{
 		{
 			TestName: "when email is valid",
 			Email:    "admin@email.com",
