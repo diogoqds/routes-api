@@ -23,6 +23,14 @@ func TestCreateSeller_Failure(t *testing.T) {
 			Seller:           nil,
 			ErrorMessage:     "name is required",
 		},
+		{
+			TestName:         "when email is empty",
+			Name:             "valid_name",
+			Email:            "",
+			CreateSellerFunc: nil,
+			Seller:           nil,
+			ErrorMessage:     "email is required",
+		},
 	}
 
 	for _, scenario := range scenarios {
