@@ -3,6 +3,7 @@ package usecases
 import (
 	"errors"
 	"github.com/diogoqds/routes-challenge-api/entities"
+	"github.com/diogoqds/routes-challenge-api/repositories"
 )
 
 type CreateSeller interface {
@@ -19,7 +20,13 @@ func (c CreateSellerUseCase) Create(name string, email string) (*entities.Seller
 	if email == "" {
 		return nil, errors.New("email is required")
 	}
-	return nil, nil
+
+	seller, err := repositories.SellerRepo.CreateSeller.Create(name, email)
+	if err != nil {
+		return nil, err
+	}
+
+	return seller, nil
 }
 
 var (
