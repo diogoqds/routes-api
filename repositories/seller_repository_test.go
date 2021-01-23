@@ -2,31 +2,14 @@ package repositories
 
 import (
 	"errors"
-	"github.com/diogoqds/routes-challenge-api/infra"
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	sqlmock "github.com/zhashkevych/go-sqlxmock"
-	"log"
 	"testing"
 )
 
 var (
-	db    *sqlx.DB
-	err   error
-	mock  sqlmock.Sqlmock
 	query = "INSERT INTO sellers"
 )
-
-func setupDb() {
-	db, mock, err = sqlmock.Newx()
-
-	if err != nil {
-		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-
-	}
-
-	infra.DB = db
-}
 
 func TestCreateSeller_Success(t *testing.T) {
 	setupDb()

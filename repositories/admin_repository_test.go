@@ -3,31 +3,17 @@ package repositories
 import (
 	"database/sql"
 	"errors"
-	"github.com/diogoqds/routes-challenge-api/infra"
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
-	"github.com/zhashkevych/go-sqlxmock"
 	"regexp"
 	"testing"
 )
 
 func TestFindByEmail_Success(t *testing.T) {
-	var db *sqlx.DB
-	var err error
-	var mock sqlmock.Sqlmock
-
-	db, mock, err = sqlmock.Newx()
-
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-
-	}
-
-	infra.DB = db
+	setupDb()
 	rows := mock.NewRows([]string{"id", "email"}).AddRow(1, "admin@email.com")
 
-	sql := "SELECT id, email FROM admins WHERE email = $1"
-	mock.ExpectQuery(regexp.QuoteMeta(sql)).WillReturnRows(rows)
+	query := "SELECT id, email FROM admins WHERE email = $1"
+	mock.ExpectQuery(regexp.QuoteMeta(query)).WillReturnRows(rows)
 	admin, err := AdminRepo.FinderByEmail.FindByEmail("admin@email.com")
 
 	assert.EqualValues(t, 1, admin.Id)
@@ -52,12 +38,7 @@ func TestFindByEmail_Error(t *testing.T) {
 			ErrorMessage: "generic error",
 		},
 	}
-	var db *sqlx.DB
-	var err error
-	var mock sqlmock.Sqlmock
-
-	db, mock, err = sqlmock.Newx()
-	infra.DB = db
+	setupDb()
 	for _, scenario := range scenarios {
 		t.Run(scenario.TestName, func(t *testing.T) {
 
@@ -77,18 +58,7 @@ func TestFindByEmail_Error(t *testing.T) {
 }
 
 func TestFindById_Success(t *testing.T) {
-	var db *sqlx.DB
-	var err error
-	var mock sqlmock.Sqlmock
-
-	db, mock, err = sqlmock.Newx()
-
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-
-	}
-
-	infra.DB = db
+	setupDb()
 	rows := mock.NewRows([]string{"id", "email"}).AddRow(1, "admin@email.com")
 
 	sql := "SELECT id, email FROM admins WHERE id = $1"
@@ -117,12 +87,7 @@ func TestFindById_Error(t *testing.T) {
 			ErrorMessage: "generic error",
 		},
 	}
-	var db *sqlx.DB
-	var err error
-	var mock sqlmock.Sqlmock
-
-	db, mock, err = sqlmock.Newx()
-	infra.DB = db
+	setupDb()
 	for _, scenario := range scenarios {
 		t.Run(scenario.TestName, func(t *testing.T) {
 
