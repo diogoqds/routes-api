@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"fmt"
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/infra"
 	"log"
