@@ -51,7 +51,7 @@ func (a adminRepositoryImplementation) FindById(id int64) (*entities.Admin, erro
 		log.Printf("no admin with id %d\n", id)
 		return nil, err
 	case err != nil:
-		log.Fatalf("query error: %v\n", err)
+		log.Printf("query error: %v\n", err)
 		return nil, err
 	default:
 		log.Printf("admin found it")
