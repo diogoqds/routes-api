@@ -6,25 +6,30 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	sqlmock "github.com/zhashkevych/go-sqlxmock"
+	"log"
 	"testing"
 )
 
-func TestCreateSeller_Success(t *testing.T) {
-	var db *sqlx.DB
-	var err error
-	var mock sqlmock.Sqlmock
+var (
+	db    *sqlx.DB
+	err   error
+	mock  sqlmock.Sqlmock
+	query = "INSERT INTO sellers"
+)
 
+func setupDb() {
 	db, mock, err = sqlmock.Newx()
 
 	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 
 	}
 
 	infra.DB = db
+}
 
-	query := "INSERT INTO sellers"
-
+func TestCreateSeller_Success(t *testing.T) {
+	setupDb()
 	mock.ExpectExec(query).
 		WithArgs("seller", "seller@email.com").
 		WillReturnResult(sqlmock.NewResult(1, 1))
@@ -37,20 +42,7 @@ func TestCreateSeller_Success(t *testing.T) {
 }
 
 func TestCreateSeller_ErrorSaving(t *testing.T) {
-	var db *sqlx.DB
-	var err error
-	var mock sqlmock.Sqlmock
-
-	db, mock, err = sqlmock.Newx()
-
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-
-	}
-
-	infra.DB = db
-
-	query := "INSERT INTO sellers"
+	setupDb()
 	mock.ExpectExec(query).
 		WithArgs("seller", "seller@email.com").
 		WillReturnError(errors.New("generic error"))
@@ -62,20 +54,7 @@ func TestCreateSeller_ErrorSaving(t *testing.T) {
 }
 
 func TestCreateSeller_ErrorReturningId(t *testing.T) {
-	var db *sqlx.DB
-	var err error
-	var mock sqlmock.Sqlmock
-
-	db, mock, err = sqlmock.Newx()
-
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-
-	}
-
-	infra.DB = db
-
-	query := "INSERT INTO sellers"
+	setupDb()
 	mock.ExpectExec(query).
 		WithArgs("seller", "seller@email.com").
 		WillReturnResult(sqlmock.NewErrorResult(errors.New("result error")))
