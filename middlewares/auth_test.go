@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/infra"
@@ -70,6 +71,18 @@ func TestAuthMiddleware(t *testing.T) {
 			StatusCode:   http.StatusUnauthorized,
 			ErrorMessage: "unauthorized",
 		},
+		{
+			Name:       "when AdminRepository returns an error",
+			AuthHeader: "Bearer token",
+			JwtDecodeFunc: func(token string) (jwt.MapClaims, error) {
+				return jwt.MapClaims{"id": float64(1)}, nil
+			},
+			FindByIdFunc: func(id int64) (*entities.Admin, error) {
+				return nil, errors.New("error while fetching the admin")
+			},
+			StatusCode:   http.StatusInternalServerError,
+			ErrorMessage: "error while fetching the admin",
+		},
 	}
 
 	for _, scenario := range scenarios {
@@ -92,6 +105,7 @@ func TestAuthMiddleware(t *testing.T) {
 			var body map[string]interface{}
 
 			json.Unmarshal(respBody, &body)
+			fmt.Println("body>>>>>", body)
 			assert.EqualValues(t, scenario.StatusCode, response.Code)
 			assert.EqualValues(t, scenario.ErrorMessage, body["message"])
 		})

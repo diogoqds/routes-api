@@ -34,7 +34,8 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
+				message := fmt.Sprintf(`{ "message": "%s" }`, err)
+				w.Write([]byte(message))
 				return
 			}
 
@@ -42,7 +43,8 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
+				message := fmt.Sprintf(`{ "message": "%s" }`, err)
+				w.Write([]byte(message))
 				return
 			}
 
