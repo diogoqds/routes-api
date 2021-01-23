@@ -3,7 +3,6 @@ package repositories
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
-	sqlmock "github.com/zhashkevych/go-sqlxmock"
 	"testing"
 )
 
@@ -13,9 +12,11 @@ var (
 
 func TestCreateSeller_Success(t *testing.T) {
 	setupDb()
-	mock.ExpectExec(query).
+
+	rows := mock.NewRows([]string{"id"}).AddRow(1)
+	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
-		WillReturnResult(sqlmock.NewResult(1, 1))
+		WillReturnRows(rows)
 
 	seller, err := SellerRepo.CreateSeller.Create("seller", "seller@email.com")
 
@@ -26,7 +27,7 @@ func TestCreateSeller_Success(t *testing.T) {
 
 func TestCreateSeller_ErrorSaving(t *testing.T) {
 	setupDb()
-	mock.ExpectExec(query).
+	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
 		WillReturnError(errors.New("generic error"))
 
@@ -38,9 +39,9 @@ func TestCreateSeller_ErrorSaving(t *testing.T) {
 
 func TestCreateSeller_ErrorReturningId(t *testing.T) {
 	setupDb()
-	mock.ExpectExec(query).
+	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
-		WillReturnResult(sqlmock.NewErrorResult(errors.New("result error")))
+		WillReturnError(errors.New("result error"))
 
 	seller, err := SellerRepo.CreateSeller.Create("seller", "seller@email.com")
 

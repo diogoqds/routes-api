@@ -25,20 +25,17 @@ func (c createSellerImplementation) Create(name string, email string) (*entities
 		UpdatedAt: time.Time{},
 		DeletedAt: nil,
 	}
-	sqlInsert := "INSERT INTO sellers (name, email) VALUES ($1, $2)"
-	result, err := infra.DB.Exec(sqlInsert, seller.Name, seller.Email)
+	sqlInsert := "INSERT INTO sellers (name, email) VALUES ($1, $2) RETURNING id"
+	var id int
+
+	err := infra.DB.QueryRow(sqlInsert, seller.Name, seller.Email).Scan(&id)
 
 	if err != nil {
 		log.Println("Error saving the seller: " + err.Error())
 		return nil, err
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		log.Println("Error getting the last insert id for new seller: " + err.Error())
-		return nil, err
-	}
-	seller.Id = int(id)
+	seller.Id = id
 	return &seller, nil
 }
 
