@@ -11,8 +11,13 @@ type CreateSeller interface {
 	Create(name string, email string) (*entities.Seller, error)
 }
 
+type ListSellers interface {
+	FindAll() ([]entities.Seller, error)
+}
+
 type SellerRepository struct {
 	CreateSeller CreateSeller
+	ListSellers  ListSellers
 }
 
 type createSellerImplementation struct{}
@@ -39,8 +44,22 @@ func (c createSellerImplementation) Create(name string, email string) (*entities
 	return &seller, nil
 }
 
+func (c createSellerImplementation) FindAll() ([]entities.Seller, error) {
+	var err error
+	sellers := make([]entities.Seller, 0)
+	query := "SELECT * FROM sellers WHERE deleted_at IS NULL"
+	err = infra.DB.Select(&sellers, query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return sellers, nil
+}
+
 var (
 	SellerRepo = SellerRepository{
 		CreateSeller: createSellerImplementation{},
+		ListSellers:  createSellerImplementation{},
 	}
 )
