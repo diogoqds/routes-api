@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/infra"
 	"log"
@@ -32,7 +33,7 @@ func (a adminRepositoryImplementation) FindByEmail(email string) (*entities.Admi
 		log.Printf("no admin with email %s\n", email)
 		return nil, err
 	case err != nil:
-		log.Fatalf("query error: %v\n", err)
+		log.Printf("query error: %v\n", err)
 		return nil, err
 	default:
 		log.Printf("admin found it")
@@ -50,7 +51,7 @@ func (a adminRepositoryImplementation) FindById(id int64) (*entities.Admin, erro
 		log.Printf("no admin with id %d\n", id)
 		return nil, err
 	case err != nil:
-		log.Fatalf("query error: %v\n", err)
+		log.Printf("query error: %v\n", err)
 		return nil, err
 	default:
 		log.Printf("admin found it")

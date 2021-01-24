@@ -2,17 +2,16 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/diogoqds/routes-challenge-api/usecases"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/diogoqds/routes-challenge-api/usecases"
 )
 
-type requestParams struct {
-	Email string `json:"email"`
+type SellerController struct {
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
+func (s SellerController) Create(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		WriteResponse(
@@ -23,7 +22,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var bodyParams requestParams
+	var bodyParams map[string]interface{}
+
 	if err = json.Unmarshal(body, &bodyParams); err != nil {
 		WriteResponse(
 			w,
@@ -33,28 +33,28 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := usecases.AuthService.Authenticate(bodyParams.Email)
+	name := fmt.Sprintf("%s", bodyParams["name"])
+	email := fmt.Sprintf("%s", bodyParams["email"])
+
+	seller, err := usecases.CreateSellerService.Create(name, email)
+
 	if err != nil {
 		WriteResponse(
 			w,
-			http.StatusBadRequest,
+			http.StatusUnprocessableEntity,
 			map[string]interface{}{"message": err.Error()},
 		)
 		return
 	}
 
-	if err != nil {
-		WriteResponse(
-			w,
-			http.StatusInternalServerError,
-			map[string]interface{}{"message": err.Error()},
-		)
-	}
-
 	WriteResponse(
 		w,
 		http.StatusCreated,
-		map[string]interface{}{"token": token},
+		map[string]interface{}{"seller": seller},
 	)
-	w.WriteHeader(http.StatusCreated)
+
 }
+
+var (
+	Seller = SellerController{}
+)
