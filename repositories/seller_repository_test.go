@@ -3,7 +3,10 @@ package repositories
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
+	sqlmock "github.com/zhashkevych/go-sqlxmock"
+	"regexp"
 	"testing"
+	"time"
 )
 
 var (
@@ -47,4 +50,67 @@ func TestCreateSeller_ErrorReturningId(t *testing.T) {
 
 	assert.EqualValues(t, "result error", err.Error())
 	assert.Nil(t, seller)
+}
+
+func TestListSeller_Success(t *testing.T) {
+	scenarios := []struct {
+		TestName string
+		Quantity int
+		MockData func() *sqlmock.Rows
+	}{
+		{
+			TestName: "when return sellers",
+			Quantity: 2,
+			MockData: func() *sqlmock.Rows {
+				rows := mock.NewRows(
+					[]string{"id", "name", "email", "created_at", "updated_at", "deleted_at"},
+				).
+					AddRow(1, "Seller 1", "seller1@email.com", time.Time{}, time.Time{}, nil).
+					AddRow(2, "Seller 2", "seller2@email.com", time.Time{}, time.Time{}, nil)
+
+				mock.NewRows(
+					[]string{"id", "name", "email", "created_at", "updated_at", "deleted_at"},
+				).AddRow(3, "Seller 3", "seller3@email.com", time.Time{}, time.Time{}, time.Time{})
+
+				return rows
+			},
+		},
+		{
+			TestName: "when there aren't sellers",
+			Quantity: 0,
+			MockData: func() *sqlmock.Rows {
+				return &sqlmock.Rows{}
+			},
+		},
+	}
+
+	for _, scenario := range scenarios {
+		t.Run(scenario.TestName, func(t *testing.T) {
+			setupDb()
+
+			rows := scenario.MockData()
+			query := "SELECT * FROM sellers WHERE deleted_at IS NULL"
+			mock.ExpectQuery(regexp.QuoteMeta(query)).WillReturnRows(rows)
+
+			sellers, err := SellerRepo.ListSellers.FindAll()
+
+			assert.Nil(t, err)
+			assert.Equal(t, scenario.Quantity, len(sellers))
+		})
+	}
+}
+
+func TestListSeller_Error(t *testing.T) {
+
+	setupDb()
+
+	query := "SELECT * FROM sellers WHERE deleted_at IS NULL"
+	mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WillReturnError(errors.New("error while fetching sellers"))
+
+	sellers, err := SellerRepo.ListSellers.FindAll()
+
+	assert.EqualValues(t, "error while fetching sellers", err.Error())
+	assert.Nil(t, sellers)
+
 }
