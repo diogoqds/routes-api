@@ -9,13 +9,10 @@ import (
 	"time"
 )
 
-var (
-	query = "INSERT INTO sellers"
-)
-
 func TestCreateSeller_Success(t *testing.T) {
 	setupTestDb()
 
+	query := "INSERT INTO sellers"
 	rows := mock.NewRows([]string{"id"}).AddRow(1)
 	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
@@ -42,6 +39,7 @@ func TestCreateSeller_ErrorSaving(t *testing.T) {
 
 func TestCreateSeller_ErrorReturningId(t *testing.T) {
 	setupTestDb()
+	query := "INSERT INTO sellers"
 	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
 		WillReturnError(errors.New("result error"))
@@ -113,4 +111,8 @@ func TestListSeller_Error(t *testing.T) {
 	assert.EqualValues(t, "error while fetching sellers", err.Error())
 	assert.Nil(t, sellers)
 
+}
+
+func TestDeleteSeller(t *testing.T) {
+	setupTestDb()
 }
