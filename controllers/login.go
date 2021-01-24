@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/diogoqds/routes-challenge-api/usecases"
@@ -14,33 +13,48 @@ type requestParams struct {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		WriteResponse(
+			w,
+			http.StatusNotFound,
+			map[string]interface{}{"message": err.Error()},
+		)
 		return
 	}
 
 	var bodyParams requestParams
 	if err = json.Unmarshal(body, &bodyParams); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		WriteResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]interface{}{"message": err.Error()},
+		)
 		return
 	}
 
 	token, err := usecases.AuthService.Authenticate(bodyParams.Email)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		WriteResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]interface{}{"message": err.Error()},
+		)
 		return
 	}
 
 	if err != nil {
-		log.Println("[JWT Error]", err)
+		WriteResponse(
+			w,
+			http.StatusInternalServerError,
+			map[string]interface{}{"message": err.Error()},
+		)
 	}
 
+	WriteResponse(
+		w,
+		http.StatusCreated,
+		map[string]interface{}{"token": token},
+	)
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(map[string]interface{}{"token": token}); err != nil {
-		log.Println("[Response Body Error]", err)
-		return
-	}
 }

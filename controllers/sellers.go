@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/diogoqds/routes-challenge-api/usecases"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -13,18 +12,24 @@ type SellerController struct {
 }
 
 func (s SellerController) Create(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		WriteResponse(
+			w,
+			http.StatusNotFound,
+			map[string]interface{}{"message": err.Error()},
+		)
 		return
 	}
 
 	var bodyParams map[string]interface{}
 
 	if err = json.Unmarshal(body, &bodyParams); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		WriteResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]interface{}{"message": err.Error()},
+		)
 		return
 	}
 
@@ -34,15 +39,20 @@ func (s SellerController) Create(w http.ResponseWriter, r *http.Request) {
 	seller, err := usecases.CreateSellerService.Create(name, email)
 
 	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		WriteResponse(
+			w,
+			http.StatusUnprocessableEntity,
+			map[string]interface{}{"message": err.Error()},
+		)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(seller); err != nil {
-		log.Println("[Response Body Error]", err)
-		return
-	}
+	WriteResponse(
+		w,
+		http.StatusCreated,
+		map[string]interface{}{"seller": seller},
+	)
+
 }
 
 var (
