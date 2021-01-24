@@ -14,7 +14,7 @@ var (
 )
 
 func TestCreateSeller_Success(t *testing.T) {
-	setupDb()
+	setupTestDb()
 
 	rows := mock.NewRows([]string{"id"}).AddRow(1)
 	mock.ExpectQuery(query).
@@ -29,7 +29,7 @@ func TestCreateSeller_Success(t *testing.T) {
 }
 
 func TestCreateSeller_ErrorSaving(t *testing.T) {
-	setupDb()
+	setupTestDb()
 	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
 		WillReturnError(errors.New("generic error"))
@@ -41,7 +41,7 @@ func TestCreateSeller_ErrorSaving(t *testing.T) {
 }
 
 func TestCreateSeller_ErrorReturningId(t *testing.T) {
-	setupDb()
+	setupTestDb()
 	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
 		WillReturnError(errors.New("result error"))
@@ -86,7 +86,7 @@ func TestListSeller_Success(t *testing.T) {
 
 	for _, scenario := range scenarios {
 		t.Run(scenario.TestName, func(t *testing.T) {
-			setupDb()
+			setupTestDb()
 
 			rows := scenario.MockData()
 			query := "SELECT * FROM sellers WHERE deleted_at IS NULL"
@@ -102,7 +102,7 @@ func TestListSeller_Success(t *testing.T) {
 
 func TestListSeller_Error(t *testing.T) {
 
-	setupDb()
+	setupTestDb()
 
 	query := "SELECT * FROM sellers WHERE deleted_at IS NULL"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).

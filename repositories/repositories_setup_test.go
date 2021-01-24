@@ -13,7 +13,7 @@ var (
 	mock sqlmock.Sqlmock
 )
 
-func setupDb() {
+func setupTestDb() {
 	db, mock, err = sqlmock.Newx()
 
 	if err != nil {

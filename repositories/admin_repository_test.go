@@ -9,7 +9,7 @@ import (
 )
 
 func TestFindByEmail_Success(t *testing.T) {
-	setupDb()
+	setupTestDb()
 	rows := mock.NewRows([]string{"id", "email"}).AddRow(1, "admin@email.com")
 
 	query := "SELECT id, email FROM admins WHERE email = $1"
@@ -38,7 +38,7 @@ func TestFindByEmail_Error(t *testing.T) {
 			ErrorMessage: "generic error",
 		},
 	}
-	setupDb()
+	setupTestDb()
 	for _, scenario := range scenarios {
 		t.Run(scenario.TestName, func(t *testing.T) {
 
@@ -58,7 +58,7 @@ func TestFindByEmail_Error(t *testing.T) {
 }
 
 func TestFindById_Success(t *testing.T) {
-	setupDb()
+	setupTestDb()
 	rows := mock.NewRows([]string{"id", "email"}).AddRow(1, "admin@email.com")
 
 	sql := "SELECT id, email FROM admins WHERE id = $1"
@@ -87,7 +87,7 @@ func TestFindById_Error(t *testing.T) {
 			ErrorMessage: "generic error",
 		},
 	}
-	setupDb()
+	setupTestDb()
 	for _, scenario := range scenarios {
 		t.Run(scenario.TestName, func(t *testing.T) {
 
