@@ -15,9 +15,14 @@ type ListSellers interface {
 	FindAll() ([]entities.Seller, error)
 }
 
+type DeleteSeller interface {
+	Delete(id int) (bool, error)
+}
+
 type SellerRepository struct {
 	CreateSeller CreateSeller
 	ListSellers  ListSellers
+	DeleteSeller DeleteSeller
 }
 
 type createSellerImplementation struct{}
@@ -57,9 +62,25 @@ func (c createSellerImplementation) FindAll() ([]entities.Seller, error) {
 	return sellers, nil
 }
 
+func (c createSellerImplementation) Delete(id int) (bool, error) {
+	var sellerId int
+
+	query := "UPDATE sellers SET deleted_at = NOW() WHERE id = $1 RETURNING id"
+
+	err := infra.DB.QueryRow(query, id).Scan(&sellerId)
+
+	if err != nil {
+		log.Println("Error deleting the seller: " + err.Error())
+		return false, err
+	}
+
+	return sellerId > 0, nil
+}
+
 var (
 	SellerRepo = SellerRepository{
 		CreateSeller: createSellerImplementation{},
 		ListSellers:  createSellerImplementation{},
+		DeleteSeller: createSellerImplementation{},
 	}
 )

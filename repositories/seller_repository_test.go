@@ -9,13 +9,10 @@ import (
 	"time"
 )
 
-var (
-	query = "INSERT INTO sellers"
-)
-
 func TestCreateSeller_Success(t *testing.T) {
 	setupTestDb()
 
+	query := "INSERT INTO sellers"
 	rows := mock.NewRows([]string{"id"}).AddRow(1)
 	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
@@ -30,6 +27,7 @@ func TestCreateSeller_Success(t *testing.T) {
 
 func TestCreateSeller_ErrorSaving(t *testing.T) {
 	setupTestDb()
+	query := "INSERT INTO sellers"
 	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
 		WillReturnError(errors.New("generic error"))
@@ -42,6 +40,7 @@ func TestCreateSeller_ErrorSaving(t *testing.T) {
 
 func TestCreateSeller_ErrorReturningId(t *testing.T) {
 	setupTestDb()
+	query := "INSERT INTO sellers"
 	mock.ExpectQuery(query).
 		WithArgs("seller", "seller@email.com").
 		WillReturnError(errors.New("result error"))
@@ -112,5 +111,29 @@ func TestListSeller_Error(t *testing.T) {
 
 	assert.EqualValues(t, "error while fetching sellers", err.Error())
 	assert.Nil(t, sellers)
+
+}
+
+func TestDeleteSeller_Success(t *testing.T) {
+	setupTestDb()
+	rows := mock.NewRows([]string{"id"}).AddRow(1)
+
+	query := "UPDATE sellers SET deleted_at = NOW() WHERE id = $1 RETURNING id"
+	mock.ExpectQuery(regexp.QuoteMeta(query)).WillReturnRows(rows)
+
+	deleted, err := SellerRepo.DeleteSeller.Delete(1)
+	assert.Nil(t, err)
+	assert.EqualValues(t, true, deleted)
+}
+
+func TestDeleteSeller_Error(t *testing.T) {
+	setupTestDb()
+
+	query := "UPDATE sellers SET deleted_at = NOW() WHERE id = $1 RETURNING id"
+	mock.ExpectQuery(regexp.QuoteMeta(query)).WillReturnError(errors.New("error deleting seller"))
+
+	deleted, err := SellerRepo.DeleteSeller.Delete(1)
+	assert.EqualValues(t, "error deleting seller", err.Error())
+	assert.EqualValues(t, false, deleted)
 
 }
