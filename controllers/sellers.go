@@ -55,6 +55,24 @@ func (s SellerController) Create(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (s SellerController) Index(w http.ResponseWriter, r *http.Request) {
+	sellers, err := usecases.ListSellerService.FindAll()
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusInternalServerError,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	WriteResponse(
+		w,
+		http.StatusOK,
+		map[string]interface{}{"sellers": sellers},
+	)
+}
+
 var (
 	Seller = SellerController{}
 )
