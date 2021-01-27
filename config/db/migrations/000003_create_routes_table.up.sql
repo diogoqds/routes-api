@@ -7,3 +7,4 @@ CREATE TABLE routes (
     updated_at      TIMESTAMP DEFAULT NOW(),
     deleted_at      TIMESTAMP DEFAULT NULL
 );
+
