@@ -2,31 +2,30 @@ package usecases
 
 import (
 	"errors"
+	"fmt"
+
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/repositories"
-	g "github.com/twpayne/go-geom"
 )
 
 type CreateRoute interface {
-	Create(name string, bounds *g.Bounds, sellerId int) (*entities.Route, error)
+	Create(name string, bounds interface{}, sellerId int) (*entities.Route, error)
 }
 
 type CreateRouteUseCase struct {
 }
 
-func (c CreateRouteUseCase) Create(name string, bounds *g.Bounds, sellerId int) (*entities.Route, error) {
+func (c CreateRouteUseCase) Create(name string, bounds interface{}, sellerId int) (*entities.Route, error) {
 	if name == "" {
 		return nil, errors.New("name is required")
 	}
+
 	if sellerId == 0 {
 		return nil, errors.New("seller_id is required")
 	}
+	boundsString := fmt.Sprintf("%v", bounds)
 
-	if bounds == nil {
-		return nil, errors.New("bounds is required")
-	}
-
-	route, err := repositories.RouteRepo.RouteCreator.Create(name, bounds, sellerId)
+	route, err := repositories.RouteRepo.RouteCreator.Create(name, boundsString, sellerId)
 	if err != nil {
 		return nil, err
 	}

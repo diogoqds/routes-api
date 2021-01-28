@@ -3,12 +3,11 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/diogoqds/routes-challenge-api/usecases"
-	g "github.com/twpayne/go-geom"
-	"github.com/twpayne/go-geom/encoding/geojson"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/diogoqds/routes-challenge-api/usecases"
 )
 
 type RoutesController struct {
@@ -37,11 +36,8 @@ func (c RoutesController) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := fmt.Sprintf("%s", bodyParams["name"])
-	boundsParam := fmt.Sprintf("%s", bodyParams["bounds"])
 
-	var bounds g.T
-
-	err = geojson.Unmarshal([]byte(boundsParam), &bounds)
+	sellerId, err := strconv.ParseInt(fmt.Sprintf("%.0f", bodyParams["seller_id"]), 10, 64)
 
 	if err != nil {
 		WriteResponse(
@@ -52,9 +48,7 @@ func (c RoutesController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sellerId, err := strconv.ParseInt(fmt.Sprintf("%.0f", bodyParams["seller_id"]), 10, 64)
-
-	route, err := usecases.CreateRouteService.Create(name, bounds.Bounds(), int(sellerId))
+	route, err := usecases.CreateRouteService.Create(name, bodyParams["bounds"], int(sellerId))
 
 	if err != nil {
 		WriteResponse(
