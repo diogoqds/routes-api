@@ -1,12 +1,12 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/diogoqds/routes-challenge-api/config"
 	"github.com/diogoqds/routes-challenge-api/infra"
 	"github.com/joho/godotenv"
-	"log"
-	"net/http"
-	"os"
 )
 
 func init() {
@@ -17,11 +17,11 @@ func init() {
 }
 
 func main() {
-	serverPort := os.Getenv("SERVER_PORT")
+
 	log.Println("Starting the application")
 	infra.SetupDB()
 	router := infra.CreateRouter()
 	config.ConfigHttpRoutes(router)
-	log.Println("Server running on ", serverPort)
-	log.Fatal(http.ListenAndServe(serverPort, router))
+	log.Println("Server running on port", 3000)
+	log.Fatal(http.ListenAndServe(":3000", router))
 }

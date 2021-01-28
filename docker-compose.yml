@@ -1,6 +1,12 @@
-version: '3'
+version: "3"
+
 volumes:
   postgis-data:
+
+# Networks to be created to facilitate communication between containers
+networks:
+  app-network:
+    driver: bridge
 
 services:
   api:
@@ -9,6 +15,11 @@ services:
       - 3000:3000
     depends_on:
       - db
+    restart: on-failure
+    networks:
+      - app-network
+    environment:
+      - DB_HOST=db
   db:
     image: kartoza/postgis:12.0
     volumes:
@@ -25,3 +36,5 @@ services:
     restart: on-failure
     healthcheck:
       test: "exit 0"
+    networks:
+      - app-network
