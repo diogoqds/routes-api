@@ -37,6 +37,8 @@ A ideia foi seguir algo na linha da arquitetura hexagonal e arquitetura limpa.
 
 1- Com o docker instalado pode usar o comando _docker-compose up_
 
+2 - Caso queira criar uma migration pode usar uma cli chamada [golang-migrate](https://github.com/golang-migrate/migrate) e tem um Makefile basta rodar o command _make migrateup_ ou _make migratedown_
+
 ### Requisições
 
 ![login](doc/login.png "Login")
