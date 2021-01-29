@@ -43,6 +43,10 @@ A ideia foi seguir algo na linha da arquitetura hexagonal e arquitetura limpa.
 
 ![login](doc/login.png "Login")
 
+![auth_fails](doc/auth_fails.png "Malformed Token")
+
+![invalid_token](doc/invalid_token.png "Invalid Token")
+
 ![create_seller](doc/create_seller.png "Create Seller")
 
 ![get_sellers](doc/get_sellers.png "Get Sellers")
