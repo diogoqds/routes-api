@@ -12,6 +12,10 @@ A ideia foi seguir algo na linha da arquitetura hexagonal e arquitetura limpa.
 
 ![hexagonal](https://apiumhub.com/wp-content/uploads/2018/10/Screenshot-2018-10-30-at-08.45.49.png "Hexagonal")
 
+## Modelagem do banco de dados
+
+![db](doc/db.png "Modelagem")
+
 **config**
 
 - _db_: aqui ficam as migrações de banco de dados, resolvi colocar dentro do projeto pensando no caso de ter algum outro desenvolvedor é interessante que todos tenham o banco com as alterações
@@ -32,3 +36,13 @@ A ideia foi seguir algo na linha da arquitetura hexagonal e arquitetura limpa.
 ### Como rodar
 
 1- Com o docker instalado pode usar o comando _docker-compose up_
+
+### Requisições
+
+![login](doc/login.png "Login")
+
+![create_seller](doc/create_seller.png "Create Seller")
+
+![get_sellers](doc/get_sellers.png "Get Sellers")
+
+![delete_seller](doc/delete_seller.png "Delete Sellers")
