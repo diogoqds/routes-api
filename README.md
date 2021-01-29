@@ -33,6 +33,20 @@ A ideia foi seguir algo na linha da arquitetura hexagonal e arquitetura limpa.
 
 **usecases**: as nossas regras de negócio ficam aqui em vez de ficar no controller ou na entity.
 
+### Padrão de commits e branchs
+
+Usei um padrão do [git-commit-msg-linter](https://www.npmjs.com/package/git-commit-msg-linter) e para criação de branch o padrão do gitflow.
+
+### Testes
+
+Foquei bastante nos testes unitários, utilizada uma lib chamada [testify](https://github.com/stretchr/testify) para simplificar as asserções nos testes. Em alguns arquivos eu criei mais de uma função para testar com um sufixo \_Success ou \_Error (Failure) e em outros eu usei um padrão da comunidade de criar uma lista de cenários de testes.
+
+Como foquei bastante em testes unitários ter desenvolvido orientado a interfaces como a arquitetura hexagonal sugere, eu tive a vantagem de conseguir fazer mocks de algumas funções, por exemplo testes de usecases/controllers não é necessária a conexão com um banco de dados, basta saber o tipo de retorno do repository e com isso eu consigo testar o meu usercase/controler.
+
+Para "mockar" o banco de dados foi utiliza a lib [go-sqlxmock](https://github.com/zhashkevych/go-sqlxmock) pois para conectar com o banco foi utilizada a [sqlx](https://github.com/jmoiron/sqlx) já que ela simplifica a conexão e as queries e parse de dados para Structs do Go.
+
+Caso queira rodar os testes pode usar o comando \*_docker-compose run api go test ./..._ ou de forma local _go test ./..._
+
 ### Como rodar
 
 1- Com o docker instalado pode usar o comando _docker-compose up_
@@ -52,3 +66,11 @@ A ideia foi seguir algo na linha da arquitetura hexagonal e arquitetura limpa.
 ![get_sellers](doc/get_sellers.png "Get Sellers")
 
 ![delete_seller](doc/delete_seller.png "Delete Sellers")
+
+### O que precisa ser feito e melhorias
+
+1 - Adicionar as operação de Routes(começado na branch feature/create-routes) e Clients
+
+2 - Criar Validators para não fazer validações nos usecases, talvez usar o padrão Composity para adicionar vários validators
+
+3 - Escrever uma documentação melhor com o Swagger
