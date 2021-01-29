@@ -69,7 +69,7 @@ Caso queira rodar os testes pode usar o comando \*_docker-compose run api go tes
 
 ### O que precisa ser feito e melhorias
 
-1 - Adicionar as operação de Routes(começado na branch feature/create-routes) e Clients
+1 - Adicionar as operações de Routes(começado na branch feature/create-routes) e Clients
 
 2 - Criar Validators para não fazer validações nos usecases, talvez usar o padrão Composity para adicionar vários validators
 
