@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 
@@ -83,6 +84,73 @@ func (c RoutesController) Create(w http.ResponseWriter, r *http.Request) {
 		map[string]interface{}{"route": route},
 	)
 
+}
+
+func (c RoutesController) Update(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.Atoi(vars["id"])
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusNotFound,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	var bodyParams map[string]interface{}
+
+	if err = json.Unmarshal(body, &bodyParams); err != nil {
+		WriteResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	name := fmt.Sprintf("%s", bodyParams["name"])
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusInternalServerError,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	var b BoundsParam
+	err = json.Unmarshal(body, &b)
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusInternalServerError,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	route, err := usecases.UpdateRouteService.Update(id, name, b.Bounds)
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusUnprocessableEntity,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	WriteResponse(
+		w,
+		http.StatusOK,
+		map[string]interface{}{"route": route},
+	)
 }
 
 var (
