@@ -26,9 +26,9 @@ type SellerRepository struct {
 	DeleteSeller DeleteSeller
 }
 
-type createSellerImplementation struct{}
+type sellerRepository struct{}
 
-func (c createSellerImplementation) Create(name string, email string) (*entities.Seller, error) {
+func (c sellerRepository) Create(name string, email string) (*entities.Seller, error) {
 	seller := entities.Seller{
 		Name:      name,
 		Email:     email,
@@ -50,7 +50,7 @@ func (c createSellerImplementation) Create(name string, email string) (*entities
 	return &seller, nil
 }
 
-func (c createSellerImplementation) FindAll() ([]entities.Seller, error) {
+func (c sellerRepository) FindAll() ([]entities.Seller, error) {
 	var err error
 	sellers := make([]entities.Seller, 0)
 	query := "SELECT * FROM sellers WHERE deleted_at IS NULL"
@@ -63,7 +63,7 @@ func (c createSellerImplementation) FindAll() ([]entities.Seller, error) {
 	return sellers, nil
 }
 
-func (c createSellerImplementation) Delete(id int) (bool, error) {
+func (c sellerRepository) Delete(id int) (bool, error) {
 	var sellerId int
 
 	query := "UPDATE sellers SET deleted_at = NOW() WHERE id = $1 RETURNING id"
@@ -80,8 +80,8 @@ func (c createSellerImplementation) Delete(id int) (bool, error) {
 
 var (
 	SellerRepo = SellerRepository{
-		CreateSeller: createSellerImplementation{},
-		ListSellers:  createSellerImplementation{},
-		DeleteSeller: createSellerImplementation{},
+		CreateSeller: sellerRepository{},
+		ListSellers:  sellerRepository{},
+		DeleteSeller: sellerRepository{},
 	}
 )
