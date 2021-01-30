@@ -168,9 +168,9 @@ func (r routeRepositoryImplementation) Disassociate(id int) (bool, error) {
 func (r routeRepositoryImplementation) FindByPoint(point string) (*entities.Route, error) {
 	var route entities.Route
 
-	sql := `SELECT * FROM routes WHERE ST_Contains(routes.bounds, ST_GeomFromGeoJSON($1::text)) AND deleted_at IS NULL`
+	sql := `SELECT id, name, created_at, updated_at, deleted_at FROM routes WHERE ST_Contains(routes.bounds, ST_GeomFromGeoJSON($1::text)) AND deleted_at IS NULL`
 
-	err := infra.DB.Select(&route, sql, point)
+	err := infra.DB.Get(&route, sql, point)
 
 	if err != nil {
 		log.Println("Error fetching the route by point: " + err.Error())
@@ -183,9 +183,9 @@ func (r routeRepositoryImplementation) FindByPoint(point string) (*entities.Rout
 func (r routeRepositoryImplementation) FindByName(name string) (*entities.Route, error) {
 	var route entities.Route
 
-	sql := `SELECT * FROM routes WHERE name = $1 AND deleted_at IS NULL`
+	sql := `SELECT id, name, created_at, updated_at, deleted_at FROM routes WHERE name = $1 AND deleted_at IS NULL`
 
-	err := infra.DB.Select(&route, sql, name)
+	err := infra.DB.Get(&route, sql, name)
 
 	if err != nil {
 		log.Println("Error fetching the route by name: " + err.Error())

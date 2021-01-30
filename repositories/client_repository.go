@@ -27,7 +27,7 @@ func (c clientRepository) Create(name string, geolocation string, routeId int) (
 		DeletedAt: nil,
 	}
 
-	sql := "INSERT INTO clients (name, geolocation, route_id) VALUES ($1, ST_GeomFromGeoJSON($2::text), $3)"
+	sql := "INSERT INTO clients (name, geolocation, route_id) VALUES ($1, ST_GeomFromGeoJSON($2::text), $3) RETURNING id"
 	var id int
 
 	err := infra.DB.QueryRow(sql, name, geolocation, routeId).Scan(&id)

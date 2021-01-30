@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/diogoqds/routes-challenge-api/repositories"
 	"log"
+
+	"github.com/diogoqds/routes-challenge-api/repositories"
 
 	"github.com/diogoqds/routes-challenge-api/entities"
 )

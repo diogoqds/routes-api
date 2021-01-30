@@ -3,9 +3,10 @@ package usecases
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/repositories"
-	"log"
 )
 
 type FindClientRoute interface {
@@ -21,19 +22,17 @@ func (f FindClientRouteUseCase) Find(point entities.Point) (*entities.Route, err
 	pointBytes, _ := json.Marshal(point)
 	pointString := fmt.Sprintf("%s", pointBytes)
 
-	route, err := repositories.RouteRepo.RouteFinderByPoint.FindByPoint(pointString)
-
-	if err != nil {
-		log.Println("usecase error, fetching route by point", err.Error())
-		return nil, err
-	}
+	route, _ := repositories.RouteRepo.RouteFinderByPoint.FindByPoint(pointString)
 
 	if route == nil {
-		route, err = repositories.RouteRepo.RouteFinderByName.FindByName(defaultRouteName)
+
+		route, err := repositories.RouteRepo.RouteFinderByName.FindByName(defaultRouteName)
+
 		if err != nil {
 			log.Println("usecase error, fetching route by name", err.Error())
 			return nil, err
 		}
+		return route, nil
 	}
 
 	return route, nil
