@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 
 	"github.com/diogoqds/routes-challenge-api/entities"
@@ -18,9 +18,19 @@ type RouteFinder interface {
 	FindByBounds(bounds string) ([]entities.Route, error)
 }
 
+type RouteUpdater interface {
+	Update(id int, name string, bounds string) (*entities.Route, error)
+}
+
+type RouteEraser interface {
+	Delete(id int) (bool, error)
+}
+
 type RouteRepository struct {
 	RouteCreator RouteCreator
 	RouteFinder  RouteFinder
+	RouteUpdater RouteUpdater
+	RouteEraser  RouteEraser
 }
 
 type routeRepositoryImplementation struct{}
@@ -51,11 +61,10 @@ func (r routeRepositoryImplementation) Create(name string, bounds string, seller
 func (r routeRepositoryImplementation) FindByBounds(bounds string) ([]entities.Route, error) {
 	routes := make([]entities.Route, 0)
 
-	sql := `SELECT id FROM routes WHERE ST_INTERSECTS(ST_GeomFromGeoJson($1), routes.bounds)`
+	sql := `SELECT id FROM routes WHERE ST_INTERSECTS(ST_GeomFromGeoJson($1), routes.bounds) AND deleted_at IS NULL`
 
 	err := infra.DB.Select(&routes, sql, bounds)
 
-	fmt.Println("bounds", bounds)
 	if err != nil {
 		log.Println("Error fetching the routes: " + err.Error())
 		return nil, err
@@ -64,9 +73,53 @@ func (r routeRepositoryImplementation) FindByBounds(bounds string) ([]entities.R
 	return routes, nil
 }
 
+func (r routeRepositoryImplementation) Update(id int, name string, bounds string) (*entities.Route, error) {
+	var route entities.Route
+	var polygon entities.Polygon
+
+	query := "UPDATE routes SET name = $1, bounds = ST_GeomFromGeoJSON($2::text) WHERE id = $3 RETURNING id, name, created_at, updated_at, deleted_at;"
+
+	err := infra.DB.QueryRow(query, name, bounds, id).
+		Scan(&route.Id, &route.Name, &route.CreatedAt, &route.UpdatedAt, &route.DeletedAt)
+
+	err = json.Unmarshal([]byte(bounds), &polygon)
+
+	if err != nil {
+		log.Println("Error unmarshalling the bounds: " + err.Error())
+		return nil, err
+	}
+
+	route.Id = id
+	route.Bounds = &polygon
+
+	if err != nil {
+		log.Println("Error updating the route: " + err.Error())
+		return nil, err
+	}
+
+	return &route, nil
+}
+
+func (r routeRepositoryImplementation) Delete(id int) (bool, error) {
+	var routeId int
+
+	query := "UPDATE routes SET deleted_at = NOW() WHERE id = $1 RETURNING id"
+
+	err := infra.DB.QueryRow(query, id).Scan(&routeId)
+
+	if err != nil {
+		log.Println("Error deleting the route: " + err.Error())
+		return false, err
+	}
+
+	return routeId > 0, nil
+}
+
 var (
 	RouteRepo = RouteRepository{
 		RouteCreator: routeRepositoryImplementation{},
 		RouteFinder:  routeRepositoryImplementation{},
+		RouteUpdater: routeRepositoryImplementation{},
+		RouteEraser:  routeRepositoryImplementation{},
 	}
 )
