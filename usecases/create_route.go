@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -9,13 +10,13 @@ import (
 )
 
 type CreateRoute interface {
-	Create(name string, bounds interface{}, sellerId int) (*entities.Route, error)
+	Create(name string, polygon entities.Polygon, sellerId int) (*entities.Route, error)
 }
 
 type CreateRouteUseCase struct {
 }
 
-func (c CreateRouteUseCase) Create(name string, bounds interface{}, sellerId int) (*entities.Route, error) {
+func (c CreateRouteUseCase) Create(name string, polygon entities.Polygon, sellerId int) (*entities.Route, error) {
 	if name == "" {
 		return nil, errors.New("name is required")
 	}
@@ -23,9 +24,11 @@ func (c CreateRouteUseCase) Create(name string, bounds interface{}, sellerId int
 	if sellerId == 0 {
 		return nil, errors.New("seller_id is required")
 	}
-	boundsString := fmt.Sprintf("%v", bounds)
 
-	route, err := repositories.RouteRepo.RouteCreator.Create(name, boundsString, sellerId)
+	polygonBytes, _ := json.Marshal(polygon)
+	polygonString := fmt.Sprintf("%s", polygonBytes)
+
+	route, err := repositories.RouteRepo.RouteCreator.Create(name, polygonString, sellerId)
 	if err != nil {
 		return nil, err
 	}

@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
 	"strconv"
 
+	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/usecases"
 )
 
 type RoutesController struct {
+}
+
+type BoundsParam struct {
+	Bounds entities.Polygon `json:"bounds"`
 }
 
 func (c RoutesController) Create(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +54,19 @@ func (c RoutesController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	route, err := usecases.CreateRouteService.Create(name, bodyParams["bounds"], int(sellerId))
+	var b BoundsParam
+	err = json.Unmarshal(body, &b)
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusInternalServerError,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	route, err := usecases.CreateRouteService.Create(name, b.Bounds, int(sellerId))
 
 	if err != nil {
 		WriteResponse(
