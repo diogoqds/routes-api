@@ -4,5 +4,3 @@ CREATE TABLE admins (
     created_at      TIMESTAMP DEFAULT NOW(),
     updated_at      TIMESTAMP DEFAULT NOW()
 );
-
-INSERT into admins (email) VALUES ("admin@email.com");
