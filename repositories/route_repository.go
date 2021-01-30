@@ -18,6 +18,14 @@ type RouteFinder interface {
 	FindByBounds(bounds string) ([]entities.Route, error)
 }
 
+type RouteFinderByPoint interface {
+	FindByPoint(point string) (*entities.Route, error)
+}
+
+type RouteFinderByName interface {
+	FindByName(name string) (*entities.Route, error)
+}
+
 type RouteUpdater interface {
 	Update(id int, name string, bounds string) (*entities.Route, error)
 }
@@ -41,6 +49,8 @@ type RouteRepository struct {
 	RouteEraser        RouteEraser
 	RouteSellerUpdater RouteSellerUpdater
 	RouteSellerDeleter RouteSellerDeleter
+	RouteFinderByPoint RouteFinderByPoint
+	RouteFinderByName  RouteFinderByName
 }
 
 type routeRepositoryImplementation struct{}
@@ -155,6 +165,36 @@ func (r routeRepositoryImplementation) Disassociate(id int) (bool, error) {
 	return routeId > 0, nil
 }
 
+func (r routeRepositoryImplementation) FindByPoint(point string) (*entities.Route, error) {
+	var route entities.Route
+
+	sql := `SELECT * FROM routes WHERE ST_Contains(routes.bounds, ST_GeomFromGeoJSON($1::text)) AND deleted_at IS NULL`
+
+	err := infra.DB.Select(&route, sql, point)
+
+	if err != nil {
+		log.Println("Error fetching the route by point: " + err.Error())
+		return nil, err
+	}
+
+	return &route, nil
+}
+
+func (r routeRepositoryImplementation) FindByName(name string) (*entities.Route, error) {
+	var route entities.Route
+
+	sql := `SELECT * FROM routes WHERE name = $1 AND deleted_at IS NULL`
+
+	err := infra.DB.Select(&route, sql, name)
+
+	if err != nil {
+		log.Println("Error fetching the route by name: " + err.Error())
+		return nil, err
+	}
+
+	return &route, nil
+}
+
 var (
 	RouteRepo = RouteRepository{
 		RouteCreator:       routeRepositoryImplementation{},
@@ -163,5 +203,7 @@ var (
 		RouteEraser:        routeRepositoryImplementation{},
 		RouteSellerUpdater: routeRepositoryImplementation{},
 		RouteSellerDeleter: routeRepositoryImplementation{},
+		RouteFinderByPoint: routeRepositoryImplementation{},
+		RouteFinderByName:  routeRepositoryImplementation{},
 	}
 )
