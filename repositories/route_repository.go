@@ -26,11 +26,16 @@ type RouteEraser interface {
 	Delete(id int) (bool, error)
 }
 
+type RouteSellerUpdater interface {
+	Associate(routeId int, sellerId int) (bool, error)
+}
+
 type RouteRepository struct {
-	RouteCreator RouteCreator
-	RouteFinder  RouteFinder
-	RouteUpdater RouteUpdater
-	RouteEraser  RouteEraser
+	RouteCreator       RouteCreator
+	RouteFinder        RouteFinder
+	RouteUpdater       RouteUpdater
+	RouteEraser        RouteEraser
+	RouteSellerUpdater RouteSellerUpdater
 }
 
 type routeRepositoryImplementation struct{}
@@ -115,11 +120,27 @@ func (r routeRepositoryImplementation) Delete(id int) (bool, error) {
 	return routeId > 0, nil
 }
 
+func (r routeRepositoryImplementation) Associate(routeId int, sellerId int) (bool, error) {
+	var id int
+
+	query := "UPDATE routes SET seller_id = $1 WHERE id = $2 RETURNING id"
+
+	err := infra.DB.QueryRow(query, sellerId, routeId).Scan(&id)
+
+	if err != nil {
+		log.Println("Error associating seller: " + err.Error())
+		return false, err
+	}
+
+	return id > 0, nil
+}
+
 var (
 	RouteRepo = RouteRepository{
-		RouteCreator: routeRepositoryImplementation{},
-		RouteFinder:  routeRepositoryImplementation{},
-		RouteUpdater: routeRepositoryImplementation{},
-		RouteEraser:  routeRepositoryImplementation{},
+		RouteCreator:       routeRepositoryImplementation{},
+		RouteFinder:        routeRepositoryImplementation{},
+		RouteUpdater:       routeRepositoryImplementation{},
+		RouteEraser:        routeRepositoryImplementation{},
+		RouteSellerUpdater: routeRepositoryImplementation{},
 	}
 )

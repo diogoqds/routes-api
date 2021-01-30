@@ -176,6 +176,61 @@ func (c RoutesController) Delete(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
+func (c RoutesController) AssociateSeller(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.Atoi(vars["id"])
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusNotFound,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	var bodyParams map[string]interface{}
+
+	if err = json.Unmarshal(body, &bodyParams); err != nil {
+		WriteResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	sellerId, err := strconv.ParseInt(fmt.Sprintf("%.0f", bodyParams["seller_id"]), 10, 64)
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusInternalServerError,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	associated, err := usecases.AssociateSellerService.Associate(id, int(sellerId))
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	WriteResponse(
+		w,
+		http.StatusOK,
+		map[string]interface{}{"associated": associated},
+	)
+}
+
 var (
 	Routes = RoutesController{}
 )
