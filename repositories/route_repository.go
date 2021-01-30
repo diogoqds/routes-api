@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/diogoqds/routes-challenge-api/entities"
@@ -13,8 +14,13 @@ type RouteCreator interface {
 	Create(name string, bounds string, sellerId int) (*entities.Route, error)
 }
 
+type RouteFinder interface {
+	FindByBounds(bounds string) ([]entities.Route, error)
+}
+
 type RouteRepository struct {
 	RouteCreator RouteCreator
+	RouteFinder  RouteFinder
 }
 
 type routeRepositoryImplementation struct{}
@@ -42,8 +48,25 @@ func (r routeRepositoryImplementation) Create(name string, bounds string, seller
 	return &route, nil
 }
 
+func (r routeRepositoryImplementation) FindByBounds(bounds string) ([]entities.Route, error) {
+	routes := make([]entities.Route, 0)
+
+	sql := `SELECT id FROM routes WHERE ST_INTERSECTS(ST_GeomFromGeoJson($1), routes.bounds)`
+
+	err := infra.DB.Select(&routes, sql, bounds)
+
+	fmt.Println("bounds", bounds)
+	if err != nil {
+		log.Println("Error fetching the routes: " + err.Error())
+		return nil, err
+	}
+
+	return routes, nil
+}
+
 var (
 	RouteRepo = RouteRepository{
 		RouteCreator: routeRepositoryImplementation{},
+		RouteFinder:  routeRepositoryImplementation{},
 	}
 )

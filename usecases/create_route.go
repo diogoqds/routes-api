@@ -28,6 +28,12 @@ func (c CreateRouteUseCase) Create(name string, polygon entities.Polygon, seller
 	polygonBytes, _ := json.Marshal(polygon)
 	polygonString := fmt.Sprintf("%s", polygonBytes)
 
+	routes, err := repositories.RouteRepo.RouteFinder.FindByBounds(polygonString)
+
+	if len(routes) > 0 {
+		return nil, errors.New("There is already a route with these coordinates")
+	}
+
 	route, err := repositories.RouteRepo.RouteCreator.Create(name, polygonString, sellerId)
 	if err != nil {
 		return nil, err
