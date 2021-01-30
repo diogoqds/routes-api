@@ -1,10 +1,11 @@
 package repositories
 
 import (
-	"github.com/diogoqds/routes-challenge-api/entities"
-	"github.com/diogoqds/routes-challenge-api/infra"
 	"log"
 	"time"
+
+	"github.com/diogoqds/routes-challenge-api/entities"
+	"github.com/diogoqds/routes-challenge-api/infra"
 )
 
 type CreateSeller interface {

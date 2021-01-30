@@ -9,7 +9,9 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.9.0
+	github.com/paulmach/go.geojson v1.4.0
 	github.com/stretchr/testify v1.7.0
+	github.com/twpayne/go-geom v1.3.6
 	github.com/zhashkevych/go-sqlxmock v1.5.1
 	google.golang.org/appengine v1.6.7 // indirect
 )
