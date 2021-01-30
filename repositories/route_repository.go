@@ -22,10 +22,15 @@ type RouteUpdater interface {
 	Update(id int, name string, bounds string) (*entities.Route, error)
 }
 
+type RouteEraser interface {
+	Delete(id int) (bool, error)
+}
+
 type RouteRepository struct {
 	RouteCreator RouteCreator
 	RouteFinder  RouteFinder
 	RouteUpdater RouteUpdater
+	RouteEraser  RouteEraser
 }
 
 type routeRepositoryImplementation struct{}
@@ -56,7 +61,7 @@ func (r routeRepositoryImplementation) Create(name string, bounds string, seller
 func (r routeRepositoryImplementation) FindByBounds(bounds string) ([]entities.Route, error) {
 	routes := make([]entities.Route, 0)
 
-	sql := `SELECT id FROM routes WHERE ST_INTERSECTS(ST_GeomFromGeoJson($1), routes.bounds)`
+	sql := `SELECT id FROM routes WHERE ST_INTERSECTS(ST_GeomFromGeoJson($1), routes.bounds) AND deleted_at IS NULL`
 
 	err := infra.DB.Select(&routes, sql, bounds)
 
@@ -95,10 +100,26 @@ func (r routeRepositoryImplementation) Update(id int, name string, bounds string
 	return &route, nil
 }
 
+func (r routeRepositoryImplementation) Delete(id int) (bool, error) {
+	var routeId int
+
+	query := "UPDATE routes SET deleted_at = NOW() WHERE id = $1 RETURNING id"
+
+	err := infra.DB.QueryRow(query, id).Scan(&routeId)
+
+	if err != nil {
+		log.Println("Error deleting the route: " + err.Error())
+		return false, err
+	}
+
+	return routeId > 0, nil
+}
+
 var (
 	RouteRepo = RouteRepository{
 		RouteCreator: routeRepositoryImplementation{},
 		RouteFinder:  routeRepositoryImplementation{},
 		RouteUpdater: routeRepositoryImplementation{},
+		RouteEraser:  routeRepositoryImplementation{},
 	}
 )
