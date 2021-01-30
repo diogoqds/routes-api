@@ -30,12 +30,17 @@ type RouteSellerUpdater interface {
 	Associate(routeId int, sellerId int) (bool, error)
 }
 
+type RouteSellerDeleter interface {
+	Disassociate(id int) (bool, error)
+}
+
 type RouteRepository struct {
 	RouteCreator       RouteCreator
 	RouteFinder        RouteFinder
 	RouteUpdater       RouteUpdater
 	RouteEraser        RouteEraser
 	RouteSellerUpdater RouteSellerUpdater
+	RouteSellerDeleter RouteSellerDeleter
 }
 
 type routeRepositoryImplementation struct{}
@@ -135,6 +140,21 @@ func (r routeRepositoryImplementation) Associate(routeId int, sellerId int) (boo
 	return id > 0, nil
 }
 
+func (r routeRepositoryImplementation) Disassociate(id int) (bool, error) {
+	var routeId int
+
+	query := "UPDATE routes SET seller_id = NULL WHERE id = $1 RETURNING id"
+
+	err := infra.DB.QueryRow(query, id).Scan(&routeId)
+
+	if err != nil {
+		log.Println("Error disassociating the seller: " + err.Error())
+		return false, err
+	}
+
+	return routeId > 0, nil
+}
+
 var (
 	RouteRepo = RouteRepository{
 		RouteCreator:       routeRepositoryImplementation{},
@@ -142,5 +162,6 @@ var (
 		RouteUpdater:       routeRepositoryImplementation{},
 		RouteEraser:        routeRepositoryImplementation{},
 		RouteSellerUpdater: routeRepositoryImplementation{},
+		RouteSellerDeleter: routeRepositoryImplementation{},
 	}
 )

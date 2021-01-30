@@ -231,6 +231,29 @@ func (c RoutesController) AssociateSeller(w http.ResponseWriter, r *http.Request
 	)
 }
 
+func (c RoutesController) DisassociateSeller(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.Atoi(vars["id"])
+
+	disassociated, err := usecases.DisassociateSellerService.Disassociate(id)
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	WriteResponse(
+		w,
+		http.StatusOK,
+		map[string]interface{}{"disassociated": disassociated},
+	)
+}
+
 var (
 	Routes = RoutesController{}
 )
