@@ -19,7 +19,7 @@ type GeolocationParam struct {
 	Geolocation entities.Point `json:"geolocation"`
 }
 
-func (s ClientController) Create(w http.ResponseWriter, r *http.Request) {
+func (c ClientController) Create(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		WriteResponse(
@@ -74,7 +74,7 @@ func (s ClientController) Create(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (s ClientController) Update(w http.ResponseWriter, r *http.Request) {
+func (c ClientController) Update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	id, err := strconv.Atoi(vars["id"])
@@ -131,6 +131,29 @@ func (s ClientController) Update(w http.ResponseWriter, r *http.Request) {
 		map[string]interface{}{"client": client},
 	)
 
+}
+
+func (c ClientController) Delete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.Atoi(vars["id"])
+
+	deleted, err := usecases.DeleteClientService.Delete(id)
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	WriteResponse(
+		w,
+		http.StatusOK,
+		map[string]interface{}{"deleted": deleted},
+	)
 }
 
 var (
