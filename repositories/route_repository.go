@@ -231,6 +231,8 @@ func (r routeRepository) FindById(id int) (*entities.Route, error) {
 
 	if reflect.ValueOf(sellerId).IsZero() {
 		route.SellerId = 0
+	} else {
+		route.SellerId = int(sellerId.Int32)
 	}
 
 	json.Unmarshal([]byte(boundsString), &route.Bounds)
