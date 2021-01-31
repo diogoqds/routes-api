@@ -1,9 +1,11 @@
 package usecases
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/diogoqds/routes-challenge-api/validators"
 
 	"github.com/diogoqds/routes-challenge-api/entities"
@@ -28,7 +30,7 @@ func (c CreateRouteUseCase) Create(name string, polygon entities.Polygon, seller
 
 	err := validators.RouteSellerValidator.RouteWithSellerId(sellerId)
 
-	if err != nil {
+	if err != sql.ErrNoRows {
 		return nil, err
 	}
 

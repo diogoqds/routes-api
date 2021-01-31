@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
+
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/repositories"
-	"reflect"
 )
 
 type UpdateRoute interface {
@@ -35,7 +36,9 @@ func (c UpdateRouteUseCase) Update(id int, name string, polygon entities.Polygon
 	routes, err := repositories.RouteRepo.RouteFinder.FindByBounds(polygonString)
 
 	if len(routes) > 0 {
-		return nil, errors.New("There is already a route with these coordinates")
+		if routes[0].Id != route.Id {
+			return nil, errors.New("There is already a route with these coordinates")
+		}
 	}
 
 	route, err = repositories.RouteRepo.RouteUpdater.Update(id, name, polygonString)
