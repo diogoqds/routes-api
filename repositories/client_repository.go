@@ -26,11 +26,17 @@ type ClientFinderById interface {
 type ClientsFinderByRouteId interface {
 	FindAllByRouteId(routeId int) ([]entities.Client, error)
 }
+
+type ClientEraser interface {
+	Delete(id int) (bool, error)
+}
+
 type ClientRepository struct {
 	ClientCreator          ClientCreator
 	ClientUpdater          ClientUpdater
 	ClientFinderById       ClientFinderById
 	ClientsFinderByRouteId ClientsFinderByRouteId
+	ClientEraser           ClientEraser
 }
 
 type clientRepository struct{}
@@ -99,7 +105,7 @@ func (c clientRepository) Update(id int, name string, geolocation string, routeI
 func (c clientRepository) FindAllByRouteId(routeId int) ([]entities.Client, error) {
 	var err error
 	clients := make([]entities.Client, 0)
-	query := "SELECT id, name, ST_AsGeoJSON(geolocation) as geolocation, created_at, updated_at, deleted_at FROM clients WHERE route_id = $1"
+	query := "SELECT id, name, ST_AsGeoJSON(geolocation) as geolocation, created_at, updated_at, deleted_at FROM clients WHERE route_id = $1 AND deleted_at IS NULL"
 
 	rows, err := infra.DB.Queryx(query, routeId)
 
@@ -121,11 +127,27 @@ func (c clientRepository) FindAllByRouteId(routeId int) ([]entities.Client, erro
 	return clients, nil
 }
 
+func (c clientRepository) Delete(id int) (bool, error) {
+	var clientId int
+
+	query := "UPDATE clients SET deleted_at = NOW() WHERE id = $1 RETURNING id"
+
+	err := infra.DB.QueryRow(query, id).Scan(&clientId)
+
+	if err != nil {
+		log.Println("Error deleting the client: " + err.Error())
+		return false, err
+	}
+
+	return clientId > 0, nil
+}
+
 var (
 	ClientRepo = ClientRepository{
 		ClientCreator:          clientRepository{},
 		ClientUpdater:          clientRepository{},
 		ClientFinderById:       clientRepository{},
 		ClientsFinderByRouteId: clientRepository{},
+		ClientEraser:           clientRepository{},
 	}
 )
