@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/diogoqds/routes-challenge-api/entities"
-	"github.com/diogoqds/routes-challenge-api/infra"
 	"log"
 	"time"
+
+	"github.com/diogoqds/routes-challenge-api/entities"
+	"github.com/diogoqds/routes-challenge-api/infra"
 )
 
 type ClientCreator interface {
@@ -22,10 +23,14 @@ type ClientFinderById interface {
 	FindById(id int) (*entities.Client, error)
 }
 
+type ClientsFinderByRouteId interface {
+	FindAllByRouteId(routeId int) ([]entities.Client, error)
+}
 type ClientRepository struct {
-	ClientCreator    ClientCreator
-	ClientUpdater    ClientUpdater
-	ClientFinderById ClientFinderById
+	ClientCreator          ClientCreator
+	ClientUpdater          ClientUpdater
+	ClientFinderById       ClientFinderById
+	ClientsFinderByRouteId ClientsFinderByRouteId
 }
 
 type clientRepository struct{}
@@ -91,10 +96,36 @@ func (c clientRepository) Update(id int, name string, geolocation string, routeI
 	return &client, nil
 }
 
+func (c clientRepository) FindAllByRouteId(routeId int) ([]entities.Client, error) {
+	var err error
+	clients := make([]entities.Client, 0)
+	query := "SELECT id, name, ST_AsGeoJSON(geolocation) as geolocation, created_at, updated_at, deleted_at FROM clients WHERE route_id = $1"
+
+	rows, err := infra.DB.Queryx(query, routeId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var client entities.Client
+		var geolocationString string
+		err = rows.Scan(&client.Id, &client.Name, &geolocationString, &client.CreatedAt, &client.UpdatedAt, &client.DeletedAt)
+		if err != nil {
+			return nil, err
+		}
+		json.Unmarshal([]byte(geolocationString), &client.Geolocation)
+		clients = append(clients, client)
+	}
+
+	return clients, nil
+}
+
 var (
 	ClientRepo = ClientRepository{
-		ClientCreator:    clientRepository{},
-		ClientUpdater:    clientRepository{},
-		ClientFinderById: clientRepository{},
+		ClientCreator:          clientRepository{},
+		ClientUpdater:          clientRepository{},
+		ClientFinderById:       clientRepository{},
+		ClientsFinderByRouteId: clientRepository{},
 	}
 )

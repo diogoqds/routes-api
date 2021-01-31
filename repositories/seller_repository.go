@@ -21,9 +21,10 @@ type DeleteSeller interface {
 }
 
 type SellerRepository struct {
-	CreateSeller CreateSeller
-	ListSellers  ListSellers
-	DeleteSeller DeleteSeller
+	CreateSeller      CreateSeller
+	ListSellers       ListSellers
+	DeleteSeller      DeleteSeller
+	FinderSellerRoute FinderSellerRoute
 }
 
 type sellerRepository struct{}
