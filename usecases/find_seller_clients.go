@@ -14,7 +14,7 @@ type ListSellerClientsUseCase struct {
 }
 
 func (l ListSellerClientsUseCase) FindAll(sellerId int) ([]entities.Client, error) {
-	route, err := repositories.SellerRepo.FinderSellerRoute.FindRoute(sellerId)
+	route, err := repositories.RouteRepo.FinderSellerRoute.FindRouteBySellerId(sellerId)
 
 	if err != nil {
 		log.Println("error fetching seller route", err.Error())

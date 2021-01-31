@@ -42,6 +42,10 @@ type RouteSellerDeleter interface {
 	Disassociate(id int) (bool, error)
 }
 
+type FinderSellerRoute interface {
+	FindRouteBySellerId(sellerId int) (*entities.Route, error)
+}
+
 type RouteRepository struct {
 	RouteCreator       RouteCreator
 	RouteFinder        RouteFinder
@@ -51,11 +55,12 @@ type RouteRepository struct {
 	RouteSellerDeleter RouteSellerDeleter
 	RouteFinderByPoint RouteFinderByPoint
 	RouteFinderByName  RouteFinderByName
+	FinderSellerRoute  FinderSellerRoute
 }
 
-type routeRepositoryImplementation struct{}
+type routeRepository struct{}
 
-func (r routeRepositoryImplementation) Create(name string, bounds string, sellerId int) (*entities.Route, error) {
+func (r routeRepository) Create(name string, bounds string, sellerId int) (*entities.Route, error) {
 	route := entities.Route{
 		Name:      name,
 		SellerId:  sellerId,
@@ -78,7 +83,7 @@ func (r routeRepositoryImplementation) Create(name string, bounds string, seller
 	return &route, nil
 }
 
-func (r routeRepositoryImplementation) FindByBounds(bounds string) ([]entities.Route, error) {
+func (r routeRepository) FindByBounds(bounds string) ([]entities.Route, error) {
 	routes := make([]entities.Route, 0)
 
 	sql := `SELECT id FROM routes WHERE ST_INTERSECTS(ST_GeomFromGeoJson($1), routes.bounds) AND deleted_at IS NULL`
@@ -93,7 +98,7 @@ func (r routeRepositoryImplementation) FindByBounds(bounds string) ([]entities.R
 	return routes, nil
 }
 
-func (r routeRepositoryImplementation) Update(id int, name string, bounds string) (*entities.Route, error) {
+func (r routeRepository) Update(id int, name string, bounds string) (*entities.Route, error) {
 	var route entities.Route
 	var polygon entities.Polygon
 
@@ -120,7 +125,7 @@ func (r routeRepositoryImplementation) Update(id int, name string, bounds string
 	return &route, nil
 }
 
-func (r routeRepositoryImplementation) Delete(id int) (bool, error) {
+func (r routeRepository) Delete(id int) (bool, error) {
 	var routeId int
 
 	query := "UPDATE routes SET deleted_at = NOW() WHERE id = $1 RETURNING id"
@@ -135,7 +140,7 @@ func (r routeRepositoryImplementation) Delete(id int) (bool, error) {
 	return routeId > 0, nil
 }
 
-func (r routeRepositoryImplementation) Associate(routeId int, sellerId int) (bool, error) {
+func (r routeRepository) Associate(routeId int, sellerId int) (bool, error) {
 	var id int
 
 	query := "UPDATE routes SET seller_id = $1 WHERE id = $2 RETURNING id"
@@ -150,7 +155,7 @@ func (r routeRepositoryImplementation) Associate(routeId int, sellerId int) (boo
 	return id > 0, nil
 }
 
-func (r routeRepositoryImplementation) Disassociate(id int) (bool, error) {
+func (r routeRepository) Disassociate(id int) (bool, error) {
 	var routeId int
 
 	query := "UPDATE routes SET seller_id = NULL WHERE id = $1 RETURNING id"
@@ -165,7 +170,7 @@ func (r routeRepositoryImplementation) Disassociate(id int) (bool, error) {
 	return routeId > 0, nil
 }
 
-func (r routeRepositoryImplementation) FindByPoint(point string) (*entities.Route, error) {
+func (r routeRepository) FindByPoint(point string) (*entities.Route, error) {
 	var route entities.Route
 
 	sql := `SELECT id, name, created_at, updated_at, deleted_at FROM routes WHERE ST_Contains(routes.bounds, ST_GeomFromGeoJSON($1::text)) AND deleted_at IS NULL`
@@ -180,7 +185,7 @@ func (r routeRepositoryImplementation) FindByPoint(point string) (*entities.Rout
 	return &route, nil
 }
 
-func (r routeRepositoryImplementation) FindByName(name string) (*entities.Route, error) {
+func (r routeRepository) FindByName(name string) (*entities.Route, error) {
 	var route entities.Route
 
 	sql := `SELECT id, name, created_at, updated_at, deleted_at FROM routes WHERE name = $1 AND deleted_at IS NULL`
@@ -195,15 +200,29 @@ func (r routeRepositoryImplementation) FindByName(name string) (*entities.Route,
 	return &route, nil
 }
 
+func (r routeRepository) FindRouteBySellerId(sellerId int) (*entities.Route, error) {
+	var route entities.Route
+	query := "SELECT routes.id as id FROM routes JOIN sellers ON routes.seller_id = sellers.id WHERE seller_id = $1"
+
+	err := infra.DB.Get(&route, query, sellerId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &route, nil
+}
+
 var (
 	RouteRepo = RouteRepository{
-		RouteCreator:       routeRepositoryImplementation{},
-		RouteFinder:        routeRepositoryImplementation{},
-		RouteUpdater:       routeRepositoryImplementation{},
-		RouteEraser:        routeRepositoryImplementation{},
-		RouteSellerUpdater: routeRepositoryImplementation{},
-		RouteSellerDeleter: routeRepositoryImplementation{},
-		RouteFinderByPoint: routeRepositoryImplementation{},
-		RouteFinderByName:  routeRepositoryImplementation{},
+		RouteCreator:       routeRepository{},
+		RouteFinder:        routeRepository{},
+		RouteUpdater:       routeRepository{},
+		RouteEraser:        routeRepository{},
+		RouteSellerUpdater: routeRepository{},
+		RouteSellerDeleter: routeRepository{},
+		RouteFinderByPoint: routeRepository{},
+		RouteFinderByName:  routeRepository{},
+		FinderSellerRoute:  routeRepository{},
 	}
 )
