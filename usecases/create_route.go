@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/diogoqds/routes-challenge-api/validators"
 
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/repositories"
@@ -23,6 +24,12 @@ func (c CreateRouteUseCase) Create(name string, polygon entities.Polygon, seller
 
 	if sellerId == 0 {
 		return nil, errors.New("seller_id is required")
+	}
+
+	err := validators.RouteSellerValidator.RouteWithSellerId(sellerId)
+
+	if err != nil {
+		return nil, err
 	}
 
 	polygonBytes, _ := json.Marshal(polygon)

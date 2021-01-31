@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"github.com/diogoqds/routes-challenge-api/repositories"
+	"github.com/diogoqds/routes-challenge-api/validators"
 )
 
 type AssociateSeller interface {
@@ -12,6 +13,10 @@ type AssociateSellerUseCase struct {
 }
 
 func (d AssociateSellerUseCase) Associate(routeId int, sellerId int) (bool, error) {
+	err := validators.RouteSellerValidator.RouteWithSellerId(sellerId)
+	if err != nil {
+		return false, err
+	}
 	return repositories.RouteRepo.RouteSellerUpdater.Associate(routeId, sellerId)
 }
 
