@@ -22,6 +22,7 @@ func ConfigHttpRoutes(router *mux.Router) {
 	router.HandleFunc("/routes/{id}/seller", middlewares.AuthMiddleware(controllers.Routes.AssociateSeller)).Methods(http.MethodPatch)
 	router.HandleFunc("/routes/{id}/seller", middlewares.AuthMiddleware(controllers.Routes.DisassociateSeller)).Methods(http.MethodDelete)
 	router.HandleFunc("/clients", controllers.Client.Create).Methods(http.MethodPost)
+	router.HandleFunc("/clients/{id}", controllers.Client.Update).Methods(http.MethodPut)
 }
 
 func Hello(w http.ResponseWriter, r *http.Request) {

@@ -7,7 +7,7 @@ import (
 type Client struct {
 	Id          int        `json:"id"`
 	Name        string     `json:"name"`
-	Geolocation Point      `json:"geolocation"`
+	Geolocation Point      `json:"geolocation" db:"geolocation"`
 	RouteId     int        `json:"route_id"`
 	Route       *Route     `json:"route"`
 	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
