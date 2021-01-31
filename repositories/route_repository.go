@@ -1,8 +1,11 @@
 package repositories
 
 import (
+	"database/sql"
 	"encoding/json"
+
 	"log"
+	"reflect"
 
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/infra"
@@ -24,6 +27,10 @@ type RouteFinderByPoint interface {
 
 type RouteFinderByName interface {
 	FindByName(name string) (*entities.Route, error)
+}
+
+type RouteFinderById interface {
+	FindById(id int) (*entities.Route, error)
 }
 
 type RouteUpdater interface {
@@ -56,6 +63,7 @@ type RouteRepository struct {
 	RouteFinderByPoint RouteFinderByPoint
 	RouteFinderByName  RouteFinderByName
 	FinderSellerRoute  FinderSellerRoute
+	RouteFinderById    RouteFinderById
 }
 
 type routeRepository struct{}
@@ -115,7 +123,7 @@ func (r routeRepository) Update(id int, name string, bounds string) (*entities.R
 	}
 
 	route.Id = id
-	route.Bounds = &polygon
+	route.Bounds = polygon
 
 	if err != nil {
 		log.Println("Error updating the route: " + err.Error())
@@ -213,6 +221,32 @@ func (r routeRepository) FindRouteBySellerId(sellerId int) (*entities.Route, err
 	return &route, nil
 }
 
+func (r routeRepository) FindById(id int) (*entities.Route, error) {
+	var route entities.Route
+	var boundsString string
+	var sellerId sql.NullInt32
+
+	query := "SELECT id, name, ST_AsGeoJSON(bounds) as bounds, seller_id, created_at, updated_at, deleted_at FROM routes WHERE id = $1"
+	err := infra.DB.QueryRow(query, id).Scan(&route.Id, &route.Name, &boundsString, &sellerId, &route.CreatedAt, &route.UpdatedAt, &route.DeletedAt)
+
+	if reflect.ValueOf(sellerId).IsZero() {
+		route.SellerId = 0
+	}
+
+	json.Unmarshal([]byte(boundsString), &route.Bounds)
+
+	switch {
+	case err == sql.ErrNoRows:
+		log.Printf("no route with id %d\n", id)
+		return nil, err
+	case err != nil:
+		log.Printf("query error: %v\n", err)
+		return nil, err
+	default:
+		return &route, nil
+	}
+}
+
 var (
 	RouteRepo = RouteRepository{
 		RouteCreator:       routeRepository{},
@@ -224,5 +258,6 @@ var (
 		RouteFinderByPoint: routeRepository{},
 		RouteFinderByName:  routeRepository{},
 		FinderSellerRoute:  routeRepository{},
+		RouteFinderById:    routeRepository{},
 	}
 )
