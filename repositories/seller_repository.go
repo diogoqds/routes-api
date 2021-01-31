@@ -20,10 +20,15 @@ type DeleteSeller interface {
 	Delete(id int) (bool, error)
 }
 
+type FinderSellerRoute interface {
+	FindRoute(sellerId int) (*entities.Route, error)
+}
+
 type SellerRepository struct {
-	CreateSeller CreateSeller
-	ListSellers  ListSellers
-	DeleteSeller DeleteSeller
+	CreateSeller      CreateSeller
+	ListSellers       ListSellers
+	DeleteSeller      DeleteSeller
+	FinderSellerRoute FinderSellerRoute
 }
 
 type sellerRepository struct{}
@@ -78,10 +83,24 @@ func (c sellerRepository) Delete(id int) (bool, error) {
 	return sellerId > 0, nil
 }
 
+func (c sellerRepository) FindRoute(sellerId int) (*entities.Route, error) {
+	var route entities.Route
+	query := "SELECT routes.id as id FROM routes JOIN sellers ON routes.seller_id = sellers.id WHERE seller_id = $1"
+
+	err := infra.DB.Get(&route, query, sellerId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &route, nil
+}
+
 var (
 	SellerRepo = SellerRepository{
-		CreateSeller: sellerRepository{},
-		ListSellers:  sellerRepository{},
-		DeleteSeller: sellerRepository{},
+		CreateSeller:      sellerRepository{},
+		ListSellers:       sellerRepository{},
+		DeleteSeller:      sellerRepository{},
+		FinderSellerRoute: sellerRepository{},
 	}
 )
