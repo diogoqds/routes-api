@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +14,8 @@ import (
 type ClientController struct {
 }
 
-type GeolocationParam struct {
+type RequestParams struct {
+	Name        string         `json:"name"`
 	Geolocation entities.Point `json:"geolocation"`
 }
 
@@ -30,7 +30,7 @@ func (c ClientController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var bodyParams map[string]interface{}
+	var bodyParams RequestParams
 
 	if err = json.Unmarshal(body, &bodyParams); err != nil {
 		WriteResponse(
@@ -41,21 +41,7 @@ func (c ClientController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := fmt.Sprintf("%s", bodyParams["name"])
-
-	var g GeolocationParam
-	err = json.Unmarshal(body, &g)
-
-	if err != nil {
-		WriteResponse(
-			w,
-			http.StatusInternalServerError,
-			map[string]interface{}{"message": err.Error()},
-		)
-		return
-	}
-
-	client, err := usecases.CreateClientService.Create(name, g.Geolocation)
+	client, err := usecases.CreateClientService.Create(bodyParams.Name, bodyParams.Geolocation)
 
 	if err != nil {
 		WriteResponse(
@@ -89,7 +75,7 @@ func (c ClientController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var bodyParams map[string]interface{}
+	var bodyParams RequestParams
 
 	if err = json.Unmarshal(body, &bodyParams); err != nil {
 		WriteResponse(
@@ -100,21 +86,7 @@ func (c ClientController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := fmt.Sprintf("%s", bodyParams["name"])
-
-	var g GeolocationParam
-	err = json.Unmarshal(body, &g)
-
-	if err != nil {
-		WriteResponse(
-			w,
-			http.StatusInternalServerError,
-			map[string]interface{}{"message": err.Error()},
-		)
-		return
-	}
-
-	client, err := usecases.UpdateClientService.Update(id, name, g.Geolocation)
+	client, err := usecases.UpdateClientService.Update(id, bodyParams.Name, bodyParams.Geolocation)
 
 	if err != nil {
 		WriteResponse(
