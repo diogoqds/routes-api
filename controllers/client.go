@@ -3,8 +3,10 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/diogoqds/routes-challenge-api/entities"
 	"github.com/diogoqds/routes-challenge-api/usecases"
@@ -54,6 +56,65 @@ func (s ClientController) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client, err := usecases.CreateClientService.Create(name, g.Geolocation)
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusUnprocessableEntity,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	WriteResponse(
+		w,
+		http.StatusCreated,
+		map[string]interface{}{"client": client},
+	)
+
+}
+
+func (s ClientController) Update(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.Atoi(vars["id"])
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusNotFound,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	var bodyParams map[string]interface{}
+
+	if err = json.Unmarshal(body, &bodyParams); err != nil {
+		WriteResponse(
+			w,
+			http.StatusBadRequest,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	name := fmt.Sprintf("%s", bodyParams["name"])
+
+	var g GeolocationParam
+	err = json.Unmarshal(body, &g)
+
+	if err != nil {
+		WriteResponse(
+			w,
+			http.StatusInternalServerError,
+			map[string]interface{}{"message": err.Error()},
+		)
+		return
+	}
+
+	client, err := usecases.UpdateClientService.Update(id, name, g.Geolocation)
 
 	if err != nil {
 		WriteResponse(
