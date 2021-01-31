@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
@@ -16,8 +15,10 @@ import (
 type RoutesController struct {
 }
 
-type BoundsParam struct {
-	Bounds entities.Polygon `json:"bounds"`
+type RouteRequestParams struct {
+	Name     string           `json:"name"`
+	Bounds   entities.Polygon `json:"bounds"`
+	SellerId int              `json:"seller_id"`
 }
 
 func (c RoutesController) Create(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +32,7 @@ func (c RoutesController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var bodyParams map[string]interface{}
+	var bodyParams RouteRequestParams
 
 	if err = json.Unmarshal(body, &bodyParams); err != nil {
 		WriteResponse(
@@ -42,10 +43,6 @@ func (c RoutesController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := fmt.Sprintf("%s", bodyParams["name"])
-
-	sellerId, err := strconv.ParseInt(fmt.Sprintf("%.0f", bodyParams["seller_id"]), 10, 64)
-
 	if err != nil {
 		WriteResponse(
 			w,
@@ -55,19 +52,7 @@ func (c RoutesController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var b BoundsParam
-	err = json.Unmarshal(body, &b)
-
-	if err != nil {
-		WriteResponse(
-			w,
-			http.StatusInternalServerError,
-			map[string]interface{}{"message": err.Error()},
-		)
-		return
-	}
-
-	route, err := usecases.CreateRouteService.Create(name, b.Bounds, int(sellerId))
+	route, err := usecases.CreateRouteService.Create(bodyParams.Name, bodyParams.Bounds, bodyParams.SellerId)
 
 	if err != nil {
 		WriteResponse(
@@ -101,7 +86,7 @@ func (c RoutesController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var bodyParams map[string]interface{}
+	var bodyParams RouteRequestParams
 
 	if err = json.Unmarshal(body, &bodyParams); err != nil {
 		WriteResponse(
@@ -112,30 +97,7 @@ func (c RoutesController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := fmt.Sprintf("%s", bodyParams["name"])
-
-	if err != nil {
-		WriteResponse(
-			w,
-			http.StatusInternalServerError,
-			map[string]interface{}{"message": err.Error()},
-		)
-		return
-	}
-
-	var b BoundsParam
-	err = json.Unmarshal(body, &b)
-
-	if err != nil {
-		WriteResponse(
-			w,
-			http.StatusInternalServerError,
-			map[string]interface{}{"message": err.Error()},
-		)
-		return
-	}
-
-	route, err := usecases.UpdateRouteService.Update(id, name, b.Bounds)
+	route, err := usecases.UpdateRouteService.Update(id, bodyParams.Name, bodyParams.Bounds)
 
 	if err != nil {
 		WriteResponse(
@@ -191,7 +153,7 @@ func (c RoutesController) AssociateSeller(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var bodyParams map[string]interface{}
+	var bodyParams RouteRequestParams
 
 	if err = json.Unmarshal(body, &bodyParams); err != nil {
 		WriteResponse(
@@ -202,8 +164,6 @@ func (c RoutesController) AssociateSeller(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	sellerId, err := strconv.ParseInt(fmt.Sprintf("%.0f", bodyParams["seller_id"]), 10, 64)
-
 	if err != nil {
 		WriteResponse(
 			w,
@@ -213,7 +173,7 @@ func (c RoutesController) AssociateSeller(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	associated, err := usecases.AssociateSellerService.Associate(id, int(sellerId))
+	associated, err := usecases.AssociateSellerService.Associate(id, bodyParams.SellerId)
 
 	if err != nil {
 		WriteResponse(

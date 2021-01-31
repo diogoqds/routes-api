@@ -27,7 +27,7 @@ func (c UpdateClientUseCase) Update(id int, name string, point entities.Point) (
 	pointBytes, _ := json.Marshal(point)
 	geolocationString := fmt.Sprintf("%s", pointBytes)
 
-	if name == "" {
+	if reflect.ValueOf(name).IsZero() {
 		name = client.Name
 	}
 
