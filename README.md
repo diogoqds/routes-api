@@ -55,6 +55,9 @@ Caso queira rodar os testes pode usar o comando \*_docker-compose run api go tes
 
 2 - Caso queira criar uma migration pode usar uma cli chamada [golang-migrate](https://github.com/golang-migrate/migrate) e tem um Makefile basta rodar o command _make migrateup_ ou _make migratedown_
 
+**docker-compose run api make migratedown**
+**docker-compose run api make migrateup**
+
 ### Requisições
 
 Na pasta docs tem um arquivo insomnia.json que pode importar no Insomnia e fazer as requisições
