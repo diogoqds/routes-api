@@ -33,6 +33,8 @@ A ideia foi seguir algo na linha da arquitetura hexagonal e arquitetura limpa.
 
 **usecases**: as nossas regras de negócio ficam aqui em vez de ficar no controller ou na entity.
 
+**validators**: onde ficam as validações dos dados.
+
 ### Padrão de commits e branchs
 
 Usei um padrão do [git-commit-msg-linter](https://www.npmjs.com/package/git-commit-msg-linter) e para criação de branch o padrão do gitflow.
@@ -54,6 +56,8 @@ Caso queira rodar os testes pode usar o comando \*_docker-compose run api go tes
 2 - Caso queira criar uma migration pode usar uma cli chamada [golang-migrate](https://github.com/golang-migrate/migrate) e tem um Makefile basta rodar o command _make migrateup_ ou _make migratedown_
 
 ### Requisições
+
+Na pasta docs tem um arquivo insomnia.json que pode importar no Insomnia e fazer as requisições
 
 ![login](doc/login.png "Login")
 
