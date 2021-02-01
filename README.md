@@ -78,8 +78,6 @@ Na pasta docs tem um arquivo insomnia.json que pode importar no Insomnia e fazer
 
 ### O que precisa ser feito e melhorias
 
-1 - Adicionar as operações de Routes(começado na branch feature/create-routes) e Clients
+1 - Criar mais Validators para não fazer validações nos usecases, talvez usar o padrão Composity para adicionar vários validators
 
-2 - Criar Validators para não fazer validações nos usecases, talvez usar o padrão Composity para adicionar vários validators
-
-3 - Escrever uma documentação melhor com o Swagger
+2 - Escrever uma documentação melhor com o Swagger
