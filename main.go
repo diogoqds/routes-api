@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/diogoqds/routes-challenge-api/config"
+	"github.com/diogoqds/routes-challenge-api/config/db/seeds"
 	"github.com/diogoqds/routes-challenge-api/infra"
 	"github.com/joho/godotenv"
 )
@@ -20,6 +21,7 @@ func main() {
 
 	log.Println("Starting the application")
 	infra.SetupDB()
+	seeds.CreateSeeds()
 	router := infra.CreateRouter()
 	config.ConfigHttpRoutes(router)
 	log.Println("Server running on port", 3000)

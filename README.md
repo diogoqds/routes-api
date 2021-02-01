@@ -18,8 +18,10 @@ A ideia foi seguir algo na linha da arquitetura hexagonal e arquitetura limpa.
 
 **config**
 
-- _db_: aqui ficam as migrações de banco de dados, resolvi colocar dentro do projeto pensando no caso de ter algum outro desenvolvedor é interessante que todos tenham o banco com as alterações
-- http-routes é um arquivo onde é definido as rotas e qual controller vai ser usado para aquela requisição
+- _db/migrations_: aqui ficam as migrações de banco de dados, resolvi colocar dentro do projeto pensando no caso de ter algum outro desenvolvedor é interessante que todos tenham o banco com as alterações
+- _db/seeds_: um arquivo go que popula o banco com o admin e a rota "Outros"
+
+- _http-routes_ é um arquivo onde é definido as rotas e qual controller vai ser usado para aquela requisição
 
 **controllers**: aqui é onde ficam os controllers que vão lidar com as requisições
 
